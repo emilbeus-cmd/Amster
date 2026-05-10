@@ -36,11 +36,12 @@ Dette er en helt statisk webapp. Du trenger ikke Node, npm, Python, terminal ell
 
 Prøv dette i rekkefølge:
 
-1. Pakk ut ZIP-filen først. Ikke åpne filene direkte inni ZIP-visningen.
-2. Åpne `vm-2026-tipping.html` i den utpakkede mappen. Dette er den tryggeste måten fordi alt ligger i én fil.
-3. Hvis du heller åpner `index.html`, kontroller at `src`-mappen ligger i samme mappe som `index.html`.
-4. Bruk en moderne nettleser som Chrome, Edge, Firefox eller Safari.
-5. Hvis siden fortsatt er blank: høyreklikk på `vm-2026-tipping.html`, velg `Åpne med`, og velg nettleseren din.
+1. Slett den gamle nedlastingen og last ned ZIP-filen på nytt hvis du lastet ned før denne feilen ble rettet.
+2. Pakk ut ZIP-filen først. Ikke åpne filene direkte inni ZIP-visningen.
+3. Åpne `vm-2026-tipping.html` i den utpakkede mappen. Dette er den tryggeste måten fordi alt ligger i én fil.
+4. Hvis du heller åpner `index.html`, kontroller at `src`-mappen ligger i samme mappe som `index.html`.
+5. Bruk en moderne nettleser som Chrome, Edge, Firefox eller Safari.
+6. Hvis siden fortsatt er blank: høyreklikk på `vm-2026-tipping.html`, velg `Åpne med`, og velg nettleseren din.
 
 ## Valgfri lokal server
 

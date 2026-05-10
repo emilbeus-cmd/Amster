@@ -25,12 +25,34 @@ const initialState = {
 
 let state = loadState()
 
-function loadState() {
+function cloneState(value) {
+  return JSON.parse(JSON.stringify(value))
+}
+
+function readStoredState() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? normalizeState({ ...initialState, ...JSON.parse(raw) }) : structuredClone(initialState)
+    return window.localStorage?.getItem(STORAGE_KEY)
   } catch {
-    return structuredClone(initialState)
+    return null
+  }
+}
+
+function writeStoredState(nextState) {
+  try {
+    window.localStorage?.setItem(STORAGE_KEY, JSON.stringify(nextState))
+  } catch {
+    // Some browsers block localStorage for local files. The app still works for the current session.
+  }
+}
+
+function loadState() {
+  const raw = readStoredState()
+  if (!raw) return cloneState(initialState)
+
+  try {
+    return normalizeState({ ...initialState, ...JSON.parse(raw) })
+  } catch {
+    return cloneState(initialState)
   }
 }
 
@@ -45,7 +67,7 @@ function normalizeState(nextState) {
 
 function persist(nextState) {
   state = normalizeState(nextState)
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+  writeStoredState(state)
   render()
 }
 
@@ -120,11 +142,12 @@ function goToRelativeGroup(direction) {
 }
 
 function resetAll() {
-  persist(structuredClone(initialState))
+  persist(cloneState(initialState))
 }
 
 function render() {
   const app = document.querySelector('#root')
+  if (!app) return
   const tables = calculateTables(state.predictions, state.customTeamNames, state.teamMeta)
   const qualifiers = buildQualifiers(tables)
   const roundOf32 = buildRoundOf32(qualifiers)
@@ -381,3 +404,19 @@ function escapeAttribute(value = '') {
 }
 
 render()
+
+
+window.addEventListener('error', (event) => {
+  const app = document.querySelector('#root')
+  if (!app || app.children.length) return
+  app.innerHTML = `
+    <main>
+      <section class="panel">
+        <p class="eyebrow">Feil ved oppstart</p>
+        <h1>Appen kunne ikke starte i denne nettleseren</h1>
+        <p>Prøv å åpne <strong>vm-2026-tipping.html</strong> i Chrome, Edge, Firefox eller Safari etter at ZIP-filen er pakket ut.</p>
+        <pre>${escapeHtml(event.message || 'Ukjent feil')}</pre>
+      </section>
+    </main>
+  `
+})
