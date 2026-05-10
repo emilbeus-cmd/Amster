@@ -883,6 +883,7 @@ window.Tournament = {
 
     </script>
     <script>
+(function () {
 const {
   buildKnockoutBracket,
   buildQualifiers,
@@ -1288,10 +1289,7 @@ function escapeAttribute(value = '') {
   return escapeHtml(value)
 }
 
-render()
-
-
-window.addEventListener('error', (event) => {
+function showStartupError(message) {
   const app = document.querySelector('#root')
   if (!app || app.children.length) return
   app.innerHTML = `
@@ -1300,11 +1298,22 @@ window.addEventListener('error', (event) => {
         <p class="eyebrow">Feil ved oppstart</p>
         <h1>Appen kunne ikke starte i denne nettleseren</h1>
         <p>Prøv å åpne <strong>vm-2026-tipping.html</strong> i Chrome, Edge, Firefox eller Safari etter at ZIP-filen er pakket ut.</p>
-        <pre>${escapeHtml(event.message || 'Ukjent feil')}</pre>
+        <pre>${escapeHtml(message || 'Ukjent feil')}</pre>
       </section>
     </main>
   `
+}
+
+window.addEventListener('error', (event) => {
+  showStartupError(event.message)
 })
+
+try {
+  render()
+} catch (error) {
+  showStartupError(error.message)
+}
+})()
 
     </script>
   </body>
