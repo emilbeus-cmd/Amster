@@ -67,6 +67,7 @@ const initialState = {
   knockoutWinners: {},
   customTeamNames: Object.fromEntries(teams.map((team) => [team.id, team.name])),
   bonusAnswers: Object.fromEntries(bonusQuestions.map((question) => [question.id, ''])),
+  participant: { firstName: '', lastName: '', email: '' },
 }
 
 let state = loadState()
@@ -108,6 +109,7 @@ function normalizeState(nextState) {
     activeGroup: groupIds.includes(nextState.activeGroup) ? nextState.activeGroup : 'A',
     customTeamNames: { ...initialState.customTeamNames, ...nextState.customTeamNames },
     bonusAnswers: { ...initialState.bonusAnswers, ...nextState.bonusAnswers },
+    participant: { ...initialState.participant, ...nextState.participant },
   }
 }
 
@@ -133,6 +135,7 @@ function captureViewport() {
 function buildRestoreSelector(dataset) {
   if (dataset.prediction && dataset.side) return `[data-prediction="${dataset.prediction}"][data-side="${dataset.side}"]`
   if (dataset.bonus) return `[data-bonus="${dataset.bonus}"]`
+  if (dataset.participant) return `[data-participant="${dataset.participant}"]`
   return null
 }
 
@@ -170,6 +173,17 @@ function updatePrediction(matchId, side, value) {
       },
     },
     knockoutWinners: {},
+  }, { preserveViewport: true })
+}
+
+
+function updateParticipant(field, value) {
+  persist({
+    ...state,
+    participant: {
+      ...state.participant,
+      [field]: value,
+    },
   }, { preserveViewport: true })
 }
 
@@ -379,6 +393,30 @@ function render() {
         </aside>
       </section>
 
+      <section class="panel participant-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Deltaker</p>
+            <h2>Hvem leverer tipset?</h2>
+          </div>
+          <p>Fyll ut fornavn, etternavn og e-post før du deler eller leverer tipset.</p>
+        </div>
+        <div class="participant-grid">
+          <label>
+            <span>Fornavn</span>
+            <input data-participant="firstName" value="${escapeAttribute(state.participant.firstName)}" autocomplete="given-name" aria-label="Fornavn" />
+          </label>
+          <label>
+            <span>Etternavn</span>
+            <input data-participant="lastName" value="${escapeAttribute(state.participant.lastName)}" autocomplete="family-name" aria-label="Etternavn" />
+          </label>
+          <label>
+            <span>E-post</span>
+            <input data-participant="email" type="email" value="${escapeAttribute(state.participant.email)}" autocomplete="email" aria-label="E-post" />
+          </label>
+        </div>
+      </section>
+
       <section class="panel group-flow-panel">
         <div class="section-heading">
           <div>
@@ -439,6 +477,9 @@ function render() {
   })
   app.querySelectorAll('[data-group-step]').forEach((button) => {
     button.addEventListener('click', (event) => goToRelativeGroup(Number(event.currentTarget.dataset.groupStep)))
+  })
+  app.querySelectorAll('[data-participant]').forEach((input) => {
+    input.addEventListener('input', (event) => updateParticipant(event.target.dataset.participant, event.target.value))
   })
   app.querySelectorAll('[data-bonus]').forEach((input) => {
     input.addEventListener('input', (event) => updateBonusAnswer(event.target.dataset.bonus, event.target.value))
