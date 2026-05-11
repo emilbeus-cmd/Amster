@@ -1,0 +1,2322 @@
+<!doctype html>
+<html lang="nb">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VM 2026 Tippekonkurranse</title>
+    <style>
+:root {
+  --deloitte-black: #000000;
+  --deloitte-green: #86bc25;
+  --deloitte-green-dark: #5f8f12;
+  --deloitte-green-soft: #eff8e5;
+  --deloitte-gray-900: #101010;
+  --deloitte-gray-700: #333333;
+  --deloitte-gray-500: #666666;
+  --deloitte-gray-200: #d8d8d8;
+  --deloitte-gray-100: #f5f5f5;
+  --white: #ffffff;
+  color: var(--deloitte-black);
+  background: var(--deloitte-black);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+main {
+  width: min(1500px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0 56px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 24px;
+  align-items: stretch;
+  padding: 42px;
+  border: 1px solid #222;
+  border-radius: 0;
+  color: var(--white);
+  background:
+    radial-gradient(circle at 82% 12%, rgba(134, 188, 37, 0.42), transparent 26%),
+    linear-gradient(135deg, #000 0%, #0b0b0b 58%, #1f2b12 100%);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.32);
+}
+
+.hero h1 {
+  max-width: 980px;
+  margin: 0;
+  font-size: clamp(2.2rem, 5vw, 5.4rem);
+  letter-spacing: -0.07em;
+  line-height: 0.95;
+}
+
+.hero p:not(.eyebrow) {
+  max-width: 820px;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 1.12rem;
+  line-height: 1.7;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: var(--deloitte-green);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.status-card,
+.panel,
+.predict-card,
+.table-card,
+.knockout-match {
+  border: 1px solid var(--deloitte-gray-200);
+  background: var(--white);
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.14);
+}
+
+.status-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  padding: 26px;
+  color: var(--deloitte-black);
+  border-color: var(--deloitte-green);
+}
+
+.status-card span {
+  font-size: 3rem;
+  font-weight: 950;
+  letter-spacing: -0.08em;
+}
+
+.status-card strong {
+  margin-bottom: 12px;
+}
+
+.status-card small {
+  color: var(--deloitte-gray-700);
+  line-height: 1.4;
+}
+
+.status-card button,
+.group-nav button,
+.group-tabs button,
+.knockout-match button {
+  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.status-card button,
+.group-nav button {
+  margin-top: 12px;
+  border: 1px solid var(--deloitte-green);
+  padding: 12px 16px;
+  color: var(--deloitte-black);
+  background: var(--deloitte-green);
+  font-weight: 900;
+}
+
+.status-card button:hover,
+.group-nav button:hover:not(:disabled),
+.group-tabs button:hover {
+  transform: translateY(-1px);
+}
+
+.panel {
+  margin-top: 24px;
+  padding: 28px;
+}
+
+.section-heading,
+.card-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: end;
+  margin-bottom: 22px;
+}
+
+.section-heading h2,
+.card-heading h3 {
+  margin: 0;
+  font-size: clamp(1.7rem, 3vw, 2.6rem);
+  letter-spacing: -0.05em;
+}
+
+.card-heading h3 {
+  font-size: 1.6rem;
+}
+
+.section-heading p:last-child {
+  max-width: 580px;
+  margin: 0;
+  color: var(--deloitte-gray-500);
+  line-height: 1.6;
+}
+
+
+.participant-panel {
+  border-color: var(--deloitte-green);
+}
+
+.participant-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.participant-grid label {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  background: var(--deloitte-gray-100);
+}
+
+.participant-grid span {
+  color: var(--deloitte-gray-700);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.group-tabs {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(72px, 1fr));
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.group-tabs button {
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--deloitte-gray-200);
+  padding: 12px 8px;
+  color: var(--deloitte-gray-900);
+  background: var(--deloitte-gray-100);
+  text-align: left;
+}
+
+.group-tabs button.active {
+  border-color: var(--deloitte-green);
+  background: var(--deloitte-green);
+  color: var(--deloitte-black);
+}
+
+.group-tabs strong {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.group-tabs span {
+  color: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.active-group-layout {
+  display: grid;
+  grid-template-columns: minmax(360px, 1.15fr) minmax(430px, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.predict-card,
+.table-card {
+  padding: 20px;
+}
+
+.table-card {
+  position: sticky;
+  top: 16px;
+}
+
+.group-nav {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.group-nav button {
+  margin: 0;
+  background: var(--deloitte-black);
+  color: var(--white);
+  border-color: var(--deloitte-black);
+}
+
+.group-nav button:last-child {
+  background: var(--deloitte-green);
+  color: var(--deloitte-black);
+  border-color: var(--deloitte-green);
+}
+
+input {
+  width: 100%;
+  border: 1px solid var(--deloitte-gray-200);
+  padding: 10px 12px;
+  color: var(--deloitte-black);
+  background: var(--white);
+}
+
+input:focus {
+  border-color: var(--deloitte-green);
+  outline: 3px solid rgba(134, 188, 37, 0.24);
+}
+
+.matches {
+  display: grid;
+  gap: 12px;
+}
+
+.match-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.9fr) minmax(0, 1fr) 54px 18px 54px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 14px;
+  border-left: 5px solid var(--deloitte-green);
+  background: var(--deloitte-gray-100);
+  font-size: 0.95rem;
+}
+
+.match-meta {
+  display: grid;
+  gap: 2px;
+  color: var(--deloitte-gray-700);
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+
+.match-meta small {
+  color: var(--deloitte-gray-500);
+}
+
+.match-row > span:nth-of-type(1) {
+  text-align: right;
+}
+
+.match-row input {
+  padding: 10px 4px;
+  text-align: center;
+  font-weight: 900;
+}
+
+.dash {
+  color: var(--deloitte-gray-500);
+  text-align: center;
+  font-weight: 900;
+}
+
+.bonus-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.bonus-result,
+.bonus-question {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(160px, 0.75fr);
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-left: 5px solid var(--deloitte-green);
+  background: var(--deloitte-gray-100);
+}
+
+.bonus-result span,
+.bonus-question span {
+  font-weight: 800;
+}
+
+.bonus-result strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 10px 12px;
+  background: var(--deloitte-black);
+  color: var(--white);
+  font-size: 1.3rem;
+}
+
+.bonus-input-wrap {
+  position: relative;
+  display: grid;
+  gap: 6px;
+}
+
+.bonus-input-wrap input[aria-invalid='true'] {
+  border-color: #d4351c;
+  outline: 3px solid rgba(212, 53, 28, 0.14);
+}
+
+.autocomplete-list {
+  display: grid;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--deloitte-gray-200);
+  background: var(--white);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+.autocomplete-list button {
+  width: 100%;
+  border: 0;
+  padding: 8px 10px;
+  color: var(--deloitte-black);
+  background: var(--deloitte-gray-100);
+  text-align: left;
+  font-weight: 800;
+}
+
+.autocomplete-list button:hover,
+.autocomplete-list button:focus {
+  background: var(--deloitte-green);
+  outline: 0;
+}
+
+.bonus-error {
+  color: #d4351c;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  font-size: 0.9rem;
+}
+
+th,
+td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #ececec;
+  text-align: left;
+  vertical-align: top;
+}
+
+th:not(:nth-child(2)),
+td:not(:nth-child(2)) {
+  text-align: center;
+}
+
+th {
+  color: var(--white);
+  background: var(--deloitte-black);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+}
+
+td:last-child {
+  max-width: 180px;
+  color: var(--deloitte-gray-500);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  text-align: left;
+}
+
+.qualified td:first-child,
+.third td:first-child {
+  position: relative;
+  font-weight: 900;
+}
+
+.qualified td:first-child::before,
+.third td:first-child::before {
+  content: '';
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--deloitte-green);
+}
+
+.third td:first-child::before {
+  background: var(--deloitte-black);
+}
+
+.legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--deloitte-gray-500);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.legend i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--deloitte-green);
+}
+
+.legend i:last-child {
+  background: var(--deloitte-black);
+}
+
+.rules-panel {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 24px;
+  background: var(--deloitte-green-soft);
+  border-color: var(--deloitte-green);
+}
+
+.rules-panel h2 {
+  margin: 0;
+  letter-spacing: -0.05em;
+}
+
+.rules-panel ol {
+  margin: 0;
+  columns: 2;
+  color: var(--deloitte-gray-700);
+  line-height: 1.6;
+}
+
+.submit-panel {
+  display: grid;
+  gap: 18px;
+  border-color: var(--deloitte-green);
+}
+
+.submit-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.submit-summary > div {
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+  background: var(--deloitte-gray-100);
+}
+
+.submit-summary span {
+  color: var(--deloitte-gray-700);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.submit-summary strong {
+  font-size: 1.15rem;
+  line-height: 1.15;
+}
+
+.submit-summary small,
+.submit-note {
+  color: var(--deloitte-gray-500);
+  line-height: 1.35;
+}
+
+.submission-status {
+  border-left: 5px solid var(--deloitte-black);
+  padding: 14px 16px;
+  color: var(--deloitte-black);
+  background: var(--deloitte-gray-100);
+  font-weight: 850;
+  line-height: 1.4;
+}
+
+.submission-status.success {
+  border-left-color: var(--deloitte-green);
+  background: var(--deloitte-green-soft);
+}
+
+.submission-status.error {
+  border-left-color: #d4351c;
+  background: #fff4f1;
+}
+
+.submit-help {
+  margin: 0;
+  color: #d4351c;
+  font-weight: 850;
+}
+
+.submit-button {
+  width: fit-content;
+  min-width: 180px;
+  border-color: var(--deloitte-green);
+  padding: 14px 22px;
+  background: var(--deloitte-green);
+  color: var(--deloitte-black);
+  font-weight: 900;
+}
+
+.submit-button:hover,
+.submit-button:focus {
+  border-color: var(--deloitte-black);
+  outline: 3px solid rgba(134, 188, 37, 0.24);
+}
+
+.bracket {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(220px, 1fr));
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.round {
+  min-width: 220px;
+}
+
+.round h3 {
+  margin: 0 0 14px;
+  letter-spacing: -0.03em;
+}
+
+.knockout-match {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 12px;
+}
+
+.knockout-match small {
+  color: var(--deloitte-gray-500);
+  font-weight: 900;
+}
+
+.knockout-match button {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  border: 1px solid var(--deloitte-gray-200);
+  padding: 10px;
+  text-align: left;
+  color: var(--deloitte-black);
+  background: var(--white);
+}
+
+.knockout-match button:not(:disabled):hover,
+.knockout-match button.selected {
+  border-color: var(--deloitte-green);
+  background: var(--deloitte-green-soft);
+}
+
+.knockout-match span {
+  font-weight: 900;
+}
+
+.knockout-match em {
+  color: var(--deloitte-gray-500);
+  font-size: 0.74rem;
+  font-style: normal;
+}
+
+@media (max-width: 1050px) {
+  .hero,
+  .active-group-layout,
+  .rules-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .table-card {
+    position: static;
+  }
+
+  .group-tabs {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .rules-panel ol {
+    columns: 1;
+  }
+}
+
+@media (max-width: 680px) {
+  main {
+    width: min(100% - 20px, 1500px);
+    padding-top: 10px;
+  }
+
+  .hero,
+  .panel {
+    padding: 22px;
+  }
+
+  .section-heading,
+  .card-heading {
+    display: block;
+  }
+
+  .group-tabs,
+  .participant-grid,
+  .submit-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .match-row {
+    grid-template-columns: 1fr 42px 10px 42px 1fr;
+    padding: 10px;
+    font-size: 0.82rem;
+  }
+
+  .match-meta {
+    grid-column: 1 / -1;
+  }
+
+  .bonus-result,
+  .bonus-question {
+    grid-template-columns: 1fr;
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <noscript>Du må aktivere JavaScript i nettleseren for å bruke VM 2026-tippekalkulatoren.</noscript>
+    <form name="vm-2026-tips" method="POST" data-netlify="true" hidden aria-hidden="true">
+      <input type="hidden" name="form-name" value="vm-2026-tips" />
+      <input type="hidden" name="formName" />
+      <input type="hidden" name="firstName" />
+      <input type="hidden" name="lastName" />
+      <input type="hidden" name="email" />
+      <input type="hidden" name="submittedAt" />
+      <input type="hidden" name="totalGroupGoals" />
+      <input type="hidden" name="championId" />
+      <input type="hidden" name="champion" />
+      <input type="hidden" name="payloadJson" />
+      <input type="hidden" name="match_A-1_home" />
+      <input type="hidden" name="match_A-1_away" />
+      <input type="hidden" name="match_A-1_label" />
+      <input type="hidden" name="match_A-2_home" />
+      <input type="hidden" name="match_A-2_away" />
+      <input type="hidden" name="match_A-2_label" />
+      <input type="hidden" name="match_A-3_home" />
+      <input type="hidden" name="match_A-3_away" />
+      <input type="hidden" name="match_A-3_label" />
+      <input type="hidden" name="match_A-4_home" />
+      <input type="hidden" name="match_A-4_away" />
+      <input type="hidden" name="match_A-4_label" />
+      <input type="hidden" name="match_A-5_home" />
+      <input type="hidden" name="match_A-5_away" />
+      <input type="hidden" name="match_A-5_label" />
+      <input type="hidden" name="match_A-6_home" />
+      <input type="hidden" name="match_A-6_away" />
+      <input type="hidden" name="match_A-6_label" />
+      <input type="hidden" name="match_B-1_home" />
+      <input type="hidden" name="match_B-1_away" />
+      <input type="hidden" name="match_B-1_label" />
+      <input type="hidden" name="match_B-2_home" />
+      <input type="hidden" name="match_B-2_away" />
+      <input type="hidden" name="match_B-2_label" />
+      <input type="hidden" name="match_B-3_home" />
+      <input type="hidden" name="match_B-3_away" />
+      <input type="hidden" name="match_B-3_label" />
+      <input type="hidden" name="match_B-4_home" />
+      <input type="hidden" name="match_B-4_away" />
+      <input type="hidden" name="match_B-4_label" />
+      <input type="hidden" name="match_B-5_home" />
+      <input type="hidden" name="match_B-5_away" />
+      <input type="hidden" name="match_B-5_label" />
+      <input type="hidden" name="match_B-6_home" />
+      <input type="hidden" name="match_B-6_away" />
+      <input type="hidden" name="match_B-6_label" />
+      <input type="hidden" name="match_C-1_home" />
+      <input type="hidden" name="match_C-1_away" />
+      <input type="hidden" name="match_C-1_label" />
+      <input type="hidden" name="match_C-2_home" />
+      <input type="hidden" name="match_C-2_away" />
+      <input type="hidden" name="match_C-2_label" />
+      <input type="hidden" name="match_C-3_home" />
+      <input type="hidden" name="match_C-3_away" />
+      <input type="hidden" name="match_C-3_label" />
+      <input type="hidden" name="match_C-4_home" />
+      <input type="hidden" name="match_C-4_away" />
+      <input type="hidden" name="match_C-4_label" />
+      <input type="hidden" name="match_C-5_home" />
+      <input type="hidden" name="match_C-5_away" />
+      <input type="hidden" name="match_C-5_label" />
+      <input type="hidden" name="match_C-6_home" />
+      <input type="hidden" name="match_C-6_away" />
+      <input type="hidden" name="match_C-6_label" />
+      <input type="hidden" name="match_D-1_home" />
+      <input type="hidden" name="match_D-1_away" />
+      <input type="hidden" name="match_D-1_label" />
+      <input type="hidden" name="match_D-2_home" />
+      <input type="hidden" name="match_D-2_away" />
+      <input type="hidden" name="match_D-2_label" />
+      <input type="hidden" name="match_D-3_home" />
+      <input type="hidden" name="match_D-3_away" />
+      <input type="hidden" name="match_D-3_label" />
+      <input type="hidden" name="match_D-4_home" />
+      <input type="hidden" name="match_D-4_away" />
+      <input type="hidden" name="match_D-4_label" />
+      <input type="hidden" name="match_D-5_home" />
+      <input type="hidden" name="match_D-5_away" />
+      <input type="hidden" name="match_D-5_label" />
+      <input type="hidden" name="match_D-6_home" />
+      <input type="hidden" name="match_D-6_away" />
+      <input type="hidden" name="match_D-6_label" />
+      <input type="hidden" name="match_E-1_home" />
+      <input type="hidden" name="match_E-1_away" />
+      <input type="hidden" name="match_E-1_label" />
+      <input type="hidden" name="match_E-2_home" />
+      <input type="hidden" name="match_E-2_away" />
+      <input type="hidden" name="match_E-2_label" />
+      <input type="hidden" name="match_E-3_home" />
+      <input type="hidden" name="match_E-3_away" />
+      <input type="hidden" name="match_E-3_label" />
+      <input type="hidden" name="match_E-4_home" />
+      <input type="hidden" name="match_E-4_away" />
+      <input type="hidden" name="match_E-4_label" />
+      <input type="hidden" name="match_E-5_home" />
+      <input type="hidden" name="match_E-5_away" />
+      <input type="hidden" name="match_E-5_label" />
+      <input type="hidden" name="match_E-6_home" />
+      <input type="hidden" name="match_E-6_away" />
+      <input type="hidden" name="match_E-6_label" />
+      <input type="hidden" name="match_F-1_home" />
+      <input type="hidden" name="match_F-1_away" />
+      <input type="hidden" name="match_F-1_label" />
+      <input type="hidden" name="match_F-2_home" />
+      <input type="hidden" name="match_F-2_away" />
+      <input type="hidden" name="match_F-2_label" />
+      <input type="hidden" name="match_F-3_home" />
+      <input type="hidden" name="match_F-3_away" />
+      <input type="hidden" name="match_F-3_label" />
+      <input type="hidden" name="match_F-4_home" />
+      <input type="hidden" name="match_F-4_away" />
+      <input type="hidden" name="match_F-4_label" />
+      <input type="hidden" name="match_F-5_home" />
+      <input type="hidden" name="match_F-5_away" />
+      <input type="hidden" name="match_F-5_label" />
+      <input type="hidden" name="match_F-6_home" />
+      <input type="hidden" name="match_F-6_away" />
+      <input type="hidden" name="match_F-6_label" />
+      <input type="hidden" name="match_G-1_home" />
+      <input type="hidden" name="match_G-1_away" />
+      <input type="hidden" name="match_G-1_label" />
+      <input type="hidden" name="match_G-2_home" />
+      <input type="hidden" name="match_G-2_away" />
+      <input type="hidden" name="match_G-2_label" />
+      <input type="hidden" name="match_G-3_home" />
+      <input type="hidden" name="match_G-3_away" />
+      <input type="hidden" name="match_G-3_label" />
+      <input type="hidden" name="match_G-4_home" />
+      <input type="hidden" name="match_G-4_away" />
+      <input type="hidden" name="match_G-4_label" />
+      <input type="hidden" name="match_G-5_home" />
+      <input type="hidden" name="match_G-5_away" />
+      <input type="hidden" name="match_G-5_label" />
+      <input type="hidden" name="match_G-6_home" />
+      <input type="hidden" name="match_G-6_away" />
+      <input type="hidden" name="match_G-6_label" />
+      <input type="hidden" name="match_H-1_home" />
+      <input type="hidden" name="match_H-1_away" />
+      <input type="hidden" name="match_H-1_label" />
+      <input type="hidden" name="match_H-2_home" />
+      <input type="hidden" name="match_H-2_away" />
+      <input type="hidden" name="match_H-2_label" />
+      <input type="hidden" name="match_H-3_home" />
+      <input type="hidden" name="match_H-3_away" />
+      <input type="hidden" name="match_H-3_label" />
+      <input type="hidden" name="match_H-4_home" />
+      <input type="hidden" name="match_H-4_away" />
+      <input type="hidden" name="match_H-4_label" />
+      <input type="hidden" name="match_H-5_home" />
+      <input type="hidden" name="match_H-5_away" />
+      <input type="hidden" name="match_H-5_label" />
+      <input type="hidden" name="match_H-6_home" />
+      <input type="hidden" name="match_H-6_away" />
+      <input type="hidden" name="match_H-6_label" />
+      <input type="hidden" name="match_I-1_home" />
+      <input type="hidden" name="match_I-1_away" />
+      <input type="hidden" name="match_I-1_label" />
+      <input type="hidden" name="match_I-2_home" />
+      <input type="hidden" name="match_I-2_away" />
+      <input type="hidden" name="match_I-2_label" />
+      <input type="hidden" name="match_I-3_home" />
+      <input type="hidden" name="match_I-3_away" />
+      <input type="hidden" name="match_I-3_label" />
+      <input type="hidden" name="match_I-4_home" />
+      <input type="hidden" name="match_I-4_away" />
+      <input type="hidden" name="match_I-4_label" />
+      <input type="hidden" name="match_I-5_home" />
+      <input type="hidden" name="match_I-5_away" />
+      <input type="hidden" name="match_I-5_label" />
+      <input type="hidden" name="match_I-6_home" />
+      <input type="hidden" name="match_I-6_away" />
+      <input type="hidden" name="match_I-6_label" />
+      <input type="hidden" name="match_J-1_home" />
+      <input type="hidden" name="match_J-1_away" />
+      <input type="hidden" name="match_J-1_label" />
+      <input type="hidden" name="match_J-2_home" />
+      <input type="hidden" name="match_J-2_away" />
+      <input type="hidden" name="match_J-2_label" />
+      <input type="hidden" name="match_J-3_home" />
+      <input type="hidden" name="match_J-3_away" />
+      <input type="hidden" name="match_J-3_label" />
+      <input type="hidden" name="match_J-4_home" />
+      <input type="hidden" name="match_J-4_away" />
+      <input type="hidden" name="match_J-4_label" />
+      <input type="hidden" name="match_J-5_home" />
+      <input type="hidden" name="match_J-5_away" />
+      <input type="hidden" name="match_J-5_label" />
+      <input type="hidden" name="match_J-6_home" />
+      <input type="hidden" name="match_J-6_away" />
+      <input type="hidden" name="match_J-6_label" />
+      <input type="hidden" name="match_K-1_home" />
+      <input type="hidden" name="match_K-1_away" />
+      <input type="hidden" name="match_K-1_label" />
+      <input type="hidden" name="match_K-2_home" />
+      <input type="hidden" name="match_K-2_away" />
+      <input type="hidden" name="match_K-2_label" />
+      <input type="hidden" name="match_K-3_home" />
+      <input type="hidden" name="match_K-3_away" />
+      <input type="hidden" name="match_K-3_label" />
+      <input type="hidden" name="match_K-4_home" />
+      <input type="hidden" name="match_K-4_away" />
+      <input type="hidden" name="match_K-4_label" />
+      <input type="hidden" name="match_K-5_home" />
+      <input type="hidden" name="match_K-5_away" />
+      <input type="hidden" name="match_K-5_label" />
+      <input type="hidden" name="match_K-6_home" />
+      <input type="hidden" name="match_K-6_away" />
+      <input type="hidden" name="match_K-6_label" />
+      <input type="hidden" name="match_L-1_home" />
+      <input type="hidden" name="match_L-1_away" />
+      <input type="hidden" name="match_L-1_label" />
+      <input type="hidden" name="match_L-2_home" />
+      <input type="hidden" name="match_L-2_away" />
+      <input type="hidden" name="match_L-2_label" />
+      <input type="hidden" name="match_L-3_home" />
+      <input type="hidden" name="match_L-3_away" />
+      <input type="hidden" name="match_L-3_label" />
+      <input type="hidden" name="match_L-4_home" />
+      <input type="hidden" name="match_L-4_away" />
+      <input type="hidden" name="match_L-4_label" />
+      <input type="hidden" name="match_L-5_home" />
+      <input type="hidden" name="match_L-5_away" />
+      <input type="hidden" name="match_L-5_label" />
+      <input type="hidden" name="match_L-6_home" />
+      <input type="hidden" name="match_L-6_away" />
+      <input type="hidden" name="match_L-6_label" />
+      <input type="hidden" name="bonus_mostGoalsTeam" />
+      <input type="hidden" name="bonus_mostConcededTeam" />
+      <input type="hidden" name="bonus_scorelessTeam" />
+      <input type="hidden" name="bonus_roughestTeam" />
+      <input type="hidden" name="bonus_penaltyShootoutMatches" />
+      <input type="hidden" name="bonus_mostPenaltiesTeam" />
+      <input type="hidden" name="bonus_starGoals" />
+      <input type="hidden" name="bonus_youngPlayer" />
+      <input type="hidden" name="bonus_bestPlayer" />
+      <input type="hidden" name="knockout_M73_winnerId" />
+      <input type="hidden" name="knockout_M73_winner" />
+      <input type="hidden" name="knockout_M74_winnerId" />
+      <input type="hidden" name="knockout_M74_winner" />
+      <input type="hidden" name="knockout_M75_winnerId" />
+      <input type="hidden" name="knockout_M75_winner" />
+      <input type="hidden" name="knockout_M76_winnerId" />
+      <input type="hidden" name="knockout_M76_winner" />
+      <input type="hidden" name="knockout_M77_winnerId" />
+      <input type="hidden" name="knockout_M77_winner" />
+      <input type="hidden" name="knockout_M78_winnerId" />
+      <input type="hidden" name="knockout_M78_winner" />
+      <input type="hidden" name="knockout_M79_winnerId" />
+      <input type="hidden" name="knockout_M79_winner" />
+      <input type="hidden" name="knockout_M80_winnerId" />
+      <input type="hidden" name="knockout_M80_winner" />
+      <input type="hidden" name="knockout_M81_winnerId" />
+      <input type="hidden" name="knockout_M81_winner" />
+      <input type="hidden" name="knockout_M82_winnerId" />
+      <input type="hidden" name="knockout_M82_winner" />
+      <input type="hidden" name="knockout_M83_winnerId" />
+      <input type="hidden" name="knockout_M83_winner" />
+      <input type="hidden" name="knockout_M84_winnerId" />
+      <input type="hidden" name="knockout_M84_winner" />
+      <input type="hidden" name="knockout_M85_winnerId" />
+      <input type="hidden" name="knockout_M85_winner" />
+      <input type="hidden" name="knockout_M86_winnerId" />
+      <input type="hidden" name="knockout_M86_winner" />
+      <input type="hidden" name="knockout_M87_winnerId" />
+      <input type="hidden" name="knockout_M87_winner" />
+      <input type="hidden" name="knockout_M88_winnerId" />
+      <input type="hidden" name="knockout_M88_winner" />
+      <input type="hidden" name="knockout_M89_winnerId" />
+      <input type="hidden" name="knockout_M89_winner" />
+      <input type="hidden" name="knockout_M90_winnerId" />
+      <input type="hidden" name="knockout_M90_winner" />
+      <input type="hidden" name="knockout_M91_winnerId" />
+      <input type="hidden" name="knockout_M91_winner" />
+      <input type="hidden" name="knockout_M92_winnerId" />
+      <input type="hidden" name="knockout_M92_winner" />
+      <input type="hidden" name="knockout_M93_winnerId" />
+      <input type="hidden" name="knockout_M93_winner" />
+      <input type="hidden" name="knockout_M94_winnerId" />
+      <input type="hidden" name="knockout_M94_winner" />
+      <input type="hidden" name="knockout_M95_winnerId" />
+      <input type="hidden" name="knockout_M95_winner" />
+      <input type="hidden" name="knockout_M96_winnerId" />
+      <input type="hidden" name="knockout_M96_winner" />
+      <input type="hidden" name="knockout_M97_winnerId" />
+      <input type="hidden" name="knockout_M97_winner" />
+      <input type="hidden" name="knockout_M98_winnerId" />
+      <input type="hidden" name="knockout_M98_winner" />
+      <input type="hidden" name="knockout_M99_winnerId" />
+      <input type="hidden" name="knockout_M99_winner" />
+      <input type="hidden" name="knockout_M100_winnerId" />
+      <input type="hidden" name="knockout_M100_winner" />
+      <input type="hidden" name="knockout_M101_winnerId" />
+      <input type="hidden" name="knockout_M101_winner" />
+      <input type="hidden" name="knockout_M102_winnerId" />
+      <input type="hidden" name="knockout_M102_winner" />
+      <input type="hidden" name="knockout_M104_winnerId" />
+      <input type="hidden" name="knockout_M104_winner" />
+    </form>
+    <div id="root"></div>
+    <script>
+const roundLabels = {
+  round32: '1/16-finaler',
+  round16: '1/8-finaler',
+  quarter: 'Kvartfinaler',
+  semi: 'Semifinaler',
+  final: 'Finale',
+}
+
+const groupIds = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
+
+const groupTeamNames = {
+  A: ['Mexico', 'South Africa', 'Korea Republic', 'Czechia'],
+  B: ['Canada', 'Bosnia and Herzegovina', 'Qatar', 'Switzerland'],
+  C: ['Brazil', 'Morocco', 'Haiti', 'Scotland'],
+  D: ['USA', 'Paraguay', 'Australia', 'Türkiye'],
+  E: ['Germany', 'Curaçao', "Côte d'Ivoire", 'Ecuador'],
+  F: ['Netherlands', 'Japan', 'Sweden', 'Tunisia'],
+  G: ['Belgium', 'Egypt', 'IR Iran', 'New Zealand'],
+  H: ['Spain', 'Cabo Verde', 'Saudi Arabia', 'Uruguay'],
+  I: ['France', 'Senegal', 'Iraq', 'Norway'],
+  J: ['Argentina', 'Algeria', 'Austria', 'Jordan'],
+  K: ['Portugal', 'Congo DR', 'Uzbekistan', 'Colombia'],
+  L: ['England', 'Croatia', 'Ghana', 'Panama'],
+}
+
+const teams = groupIds.flatMap((group) =>
+  groupTeamNames[group].map((name, index) => ({
+    id: `${group}${index + 1}`,
+    name,
+    group,
+  })),
+)
+
+const teamById = new Map(teams.map((team) => [team.id, team]))
+
+const matchScheduleByGroup = {
+  A: [
+    ['A1', 'A2', '11. juni 2026', '21:00 norsk tid', 'Estadio Azteca, Mexico City'],
+    ['A3', 'A4', '12. juni 2026', '04:00 norsk tid', 'Estadio Akron, Guadalajara'],
+    ['A2', 'A4', '18. juni 2026', '18:00 norsk tid', 'Mercedes-Benz Stadium, Atlanta'],
+    ['A1', 'A3', '19. juni 2026', '03:00 norsk tid', 'Estadio Akron, Guadalajara'],
+    ['A1', 'A4', '25. juni 2026', '03:00 norsk tid', 'Estadio Azteca, Mexico City'],
+    ['A3', 'A2', '25. juni 2026', '03:00 norsk tid', 'Estadio BBVA, Monterrey'],
+  ],
+  B: [
+    ['B1', 'B2', '12. juni 2026', '21:00 norsk tid', 'BMO Field, Toronto'],
+    ['B3', 'B4', '13. juni 2026', '21:00 norsk tid', "Levi's Stadium, Santa Clara"],
+    ['B4', 'B2', '18. juni 2026', '21:00 norsk tid', 'SoFi Stadium, Inglewood'],
+    ['B1', 'B3', '19. juni 2026', '00:00 norsk tid (natt til 19. juni)', 'BC Place, Vancouver'],
+    ['B1', 'B4', '24. juni 2026', '21:00 norsk tid', 'BC Place, Vancouver'],
+    ['B3', 'B2', '24. juni 2026', '21:00 norsk tid', 'Lumen Field, Seattle'],
+  ],
+  C: [
+    ['C1', 'C2', '14. juni 2026', '00:00 norsk tid (natt til 14. juni)', 'MetLife Stadium, East Rutherford'],
+    ['C3', 'C4', '14. juni 2026', '03:00 norsk tid', 'Gillette Stadium, Foxborough'],
+    ['C4', 'C2', '19. juni 2026', '21:00 norsk tid', 'Gillette Stadium, Foxborough'],
+    ['C1', 'C3', '20. juni 2026', '03:00 norsk tid', 'Lincoln Financial Field, Philadelphia'],
+    ['C4', 'C1', '25. juni 2026', '00:00 norsk tid (natt til 25. juni)', 'Hard Rock Stadium, Miami Gardens'],
+    ['C2', 'C3', '25. juni 2026', '00:00 norsk tid (natt til 25. juni)', 'Mercedes-Benz Stadium, Atlanta'],
+  ],
+  D: [
+    ['D1', 'D2', '13. juni 2026', '03:00 norsk tid', 'SoFi Stadium, Inglewood'],
+    ['D3', 'D4', '13. juni 2026', '06:00 norsk tid', 'BC Place, Vancouver'],
+    ['D2', 'D4', '19. juni 2026', '06:00 norsk tid', "Levi's Stadium, Santa Clara"],
+    ['D1', 'D3', '19. juni 2026', '21:00 norsk tid', 'Lumen Field, Seattle'],
+    ['D1', 'D4', '26. juni 2026', '04:00 norsk tid', 'SoFi Stadium, Inglewood'],
+    ['D2', 'D3', '26. juni 2026', '04:00 norsk tid', "Levi's Stadium, Santa Clara"],
+  ],
+  E: [
+    ['E1', 'E2', '14. juni 2026', '19:00 norsk tid', 'NRG Stadium, Houston'],
+    ['E3', 'E4', '15. juni 2026', '01:00 norsk tid', 'Lincoln Financial Field, Philadelphia'],
+    ['E1', 'E3', '20. juni 2026', '22:00 norsk tid', 'BMO Field, Toronto'],
+    ['E4', 'E2', '21. juni 2026', '02:00 norsk tid', 'GEHA Field at Arrowhead, Kansas City'],
+    ['E4', 'E1', '25. juni 2026', '22:00 norsk tid', 'MetLife Stadium, East Rutherford'],
+    ['E2', 'E3', '25. juni 2026', '22:00 norsk tid', 'Lincoln Financial Field, Philadelphia'],
+  ],
+  F: [
+    ['F1', 'F2', '14. juni 2026', '22:00 norsk tid', 'AT&T Stadium, Arlington'],
+    ['F4', 'F3', '15. juni 2026', '04:00 norsk tid', 'Estadio BBVA, Monterrey'],
+    ['F4', 'F2', '20. juni 2026', '06:00 norsk tid', 'Estadio BBVA, Monterrey'],
+    ['F1', 'F3', '20. juni 2026', '19:00 norsk tid', 'NRG Stadium, Houston'],
+    ['F4', 'F1', '26. juni 2026', '01:00 norsk tid', 'GEHA Field at Arrowhead, Kansas City'],
+    ['F2', 'F3', '26. juni 2026', '01:00 norsk tid', 'AT&T Stadium, Arlington'],
+  ],
+  G: [
+    ['G1', 'G2', '15. juni 2026', '21:00 norsk tid', 'Lumen Field, Seattle'],
+    ['G3', 'G4', '16. juni 2026', '03:00 norsk tid', 'SoFi Stadium, Inglewood'],
+    ['G1', 'G3', '21. juni 2026', '21:00 norsk tid', 'SoFi Stadium, Inglewood'],
+    ['G4', 'G2', '22. juni 2026', '03:00 norsk tid', 'BC Place, Vancouver'],
+    ['G4', 'G1', '27. juni 2026', '05:00 norsk tid', 'BC Place, Vancouver'],
+    ['G2', 'G3', '27. juni 2026', '05:00 norsk tid', 'Lumen Field, Seattle'],
+  ],
+  H: [
+    ['H1', 'H2', '15. juni 2026', '18:00 norsk tid', 'Mercedes-Benz Stadium, Atlanta'],
+    ['H3', 'H4', '16. juni 2026', '00:00 norsk tid (natt til 16. juni)', 'Hard Rock Stadium, Miami Gardens'],
+    ['H1', 'H3', '21. juni 2026', '18:00 norsk tid', 'Mercedes-Benz Stadium, Atlanta'],
+    ['H4', 'H2', '22. juni 2026', '00:00 norsk tid (natt til 22. juni)', 'Hard Rock Stadium, Miami Gardens'],
+    ['H4', 'H1', '27. juni 2026', '02:00 norsk tid', 'Estadio Akron, Guadalajara'],
+    ['H2', 'H3', '27. juni 2026', '02:00 norsk tid', 'NRG Stadium, Houston'],
+  ],
+  I: [
+    ['I1', 'I2', '16. juni 2026', '21:00 norsk tid', 'MetLife Stadium, East Rutherford'],
+    ['I4', 'I3', '17. juni 2026', '00:00 norsk tid (natt til 17. juni)', 'Gillette Stadium, Foxborough'],
+    ['I1', 'I3', '22. juni 2026', '23:00 norsk tid', 'Lincoln Financial Field, Philadelphia'],
+    ['I4', 'I2', '23. juni 2026', '02:00 norsk tid', 'MetLife Stadium, East Rutherford'],
+    ['I4', 'I1', '26. juni 2026', '21:00 norsk tid', 'Gillette Stadium, Foxborough'],
+    ['I2', 'I3', '26. juni 2026', '21:00 norsk tid', 'BMO Field, Toronto'],
+  ],
+  J: [
+    ['J3', 'J4', '16. juni 2026', '06:00 norsk tid', "Levi's Stadium, Santa Clara"],
+    ['J1', 'J2', '17. juni 2026', '03:00 norsk tid', 'GEHA Field at Arrowhead, Kansas City'],
+    ['J1', 'J3', '22. juni 2026', '19:00 norsk tid', 'AT&T Stadium, Arlington'],
+    ['J4', 'J2', '23. juni 2026', '05:00 norsk tid', "Levi's Stadium, Santa Clara"],
+    ['J4', 'J1', '28. juni 2026', '04:00 norsk tid', 'AT&T Stadium, Arlington'],
+    ['J2', 'J3', '28. juni 2026', '04:00 norsk tid', 'GEHA Field at Arrowhead, Kansas City'],
+  ],
+  K: [
+    ['K1', 'K2', '17. juni 2026', '19:00 norsk tid', 'NRG Stadium, Houston'],
+    ['K3', 'K4', '18. juni 2026', '04:00 norsk tid', 'Estadio Azteca, Mexico City'],
+    ['K1', 'K3', '23. juni 2026', '19:00 norsk tid', 'NRG Stadium, Houston'],
+    ['K4', 'K2', '24. juni 2026', '04:00 norsk tid', 'Estadio Akron, Guadalajara'],
+    ['K4', 'K1', '28. juni 2026', '01:30 norsk tid', 'Hard Rock Stadium, Miami Gardens'],
+    ['K3', 'K2', '28. juni 2026', '01:30 norsk tid', 'Mercedes-Benz Stadium, Atlanta'],
+  ],
+  L: [
+    ['L1', 'L2', '17. juni 2026', '22:00 norsk tid', 'AT&T Stadium, Arlington'],
+    ['L3', 'L4', '18. juni 2026', '01:00 norsk tid', 'BMO Field, Toronto'],
+    ['L1', 'L3', '23. juni 2026', '22:00 norsk tid', 'Gillette Stadium, Foxborough'],
+    ['L4', 'L2', '24. juni 2026', '01:00 norsk tid', 'BMO Field, Toronto'],
+    ['L4', 'L1', '27. juni 2026', '23:00 norsk tid', 'MetLife Stadium, East Rutherford'],
+    ['L2', 'L3', '27. juni 2026', '23:00 norsk tid', 'Lincoln Financial Field, Philadelphia'],
+  ],
+}
+
+const groupMatches = groupIds.flatMap((group) =>
+  matchScheduleByGroup[group].map(([home, away, date, time, venue], matchIndex) => ({
+    id: `${group}-${matchIndex + 1}`,
+    group,
+    home,
+    away,
+    date,
+    time,
+    venue,
+  })),
+)
+
+const emptyRow = (team) => ({
+  team,
+  played: 0,
+  won: 0,
+  drawn: 0,
+  lost: 0,
+  goalsFor: 0,
+  goalsAgainst: 0,
+  goalDifference: 0,
+  points: 0,
+  headToHeadNote: '',
+})
+
+const parseScore = (value) => {
+  if ((value ?? '').trim() === '') return null
+  const parsed = Number(value)
+  if (!Number.isInteger(parsed) || parsed < 0) return null
+  return parsed
+}
+
+function hasValidPrediction(prediction) {
+  return Boolean(prediction && parseScore(prediction.home) !== null && parseScore(prediction.away) !== null)
+}
+
+function compareRows(a, b) {
+  if (!a && !b) return 0
+  if (!a) return 1
+  if (!b) return -1
+
+  return (
+    b.points - a.points ||
+    b.goalDifference - a.goalDifference ||
+    b.goalsFor - a.goalsFor ||
+    a.team.name.localeCompare(b.team.name, 'nb')
+  )
+}
+
+function calculateTables(predictions, teamNames = {}) {
+  return Object.fromEntries(
+    groupIds.map((group) => {
+      const rows = new Map(
+        teams
+          .filter((team) => team.group === group)
+          .map((team) => [team.id, emptyRow({ ...team, name: teamNames[team.id] || team.name })]),
+      )
+      const matches = groupMatches.filter((match) => match.group === group)
+
+      matches.forEach((match) => {
+        const prediction = predictions[match.id]
+        const homeGoals = parseScore(prediction?.home ?? '')
+        const awayGoals = parseScore(prediction?.away ?? '')
+
+        if (homeGoals === null || awayGoals === null) return
+
+        const homeRow = rows.get(match.home)
+        const awayRow = rows.get(match.away)
+        if (!homeRow || !awayRow) return
+
+        applyResult(homeRow, awayRow, homeGoals, awayGoals)
+      })
+
+      return [group, sortGroupRows([...rows.values()], matches, predictions)]
+    }),
+  )
+}
+
+function getGroupProgress(group, predictions) {
+  const matches = groupMatches.filter((match) => match.group === group)
+  return {
+    completed: matches.filter((match) => hasValidPrediction(predictions[match.id])).length,
+    total: matches.length,
+  }
+}
+
+function explainTieBreaker(row, table) {
+  const tiedOnPoints = table.filter((candidate) => candidate.points === row.points)
+  if (tiedOnPoints.length === 1) return 'Ikke poenglikhet'
+  return row.headToHeadNote || 'Sortert på total målforskjell og scorede mål'
+}
+
+function applyResult(homeRow, awayRow, homeGoals, awayGoals) {
+  homeRow.played += 1
+  awayRow.played += 1
+  homeRow.goalsFor += homeGoals
+  homeRow.goalsAgainst += awayGoals
+  awayRow.goalsFor += awayGoals
+  awayRow.goalsAgainst += homeGoals
+
+  if (homeGoals > awayGoals) {
+    homeRow.won += 1
+    awayRow.lost += 1
+    homeRow.points += 3
+  } else if (homeGoals < awayGoals) {
+    awayRow.won += 1
+    homeRow.lost += 1
+    awayRow.points += 3
+  } else {
+    homeRow.drawn += 1
+    awayRow.drawn += 1
+    homeRow.points += 1
+    awayRow.points += 1
+  }
+
+  homeRow.goalDifference = homeRow.goalsFor - homeRow.goalsAgainst
+  awayRow.goalDifference = awayRow.goalsFor - awayRow.goalsAgainst
+}
+
+function sortGroupRows(rows, matches, predictions) {
+  const sorted = rows.sort(compareRows)
+  const result = []
+
+  for (let index = 0; index < sorted.length;) {
+    const tiedRows = [sorted[index]]
+    index += 1
+
+    while (index < sorted.length && hasSamePrimaryTie(sorted[index], tiedRows[0])) {
+      tiedRows.push(sorted[index])
+      index += 1
+    }
+
+    result.push(...sortPointTie(tiedRows, matches, predictions))
+  }
+
+  return result
+}
+
+function hasSamePrimaryTie(a, b) {
+  return a.points === b.points && a.goalDifference === b.goalDifference && a.goalsFor === b.goalsFor
+}
+
+function sortPointTie(rows, matches, predictions) {
+  if (rows.length <= 1) return rows
+
+  const concernedIds = new Set(rows.map((row) => row.team.id))
+  const headToHead = new Map(rows.map((row) => [row.team.id, emptyRow(row.team)]))
+
+  matches.forEach((match) => {
+    if (!concernedIds.has(match.home) || !concernedIds.has(match.away)) return
+    const prediction = predictions[match.id]
+    const homeGoals = parseScore(prediction?.home ?? '')
+    const awayGoals = parseScore(prediction?.away ?? '')
+    if (homeGoals === null || awayGoals === null) return
+    applyResult(headToHead.get(match.home), headToHead.get(match.away), homeGoals, awayGoals)
+  })
+
+  const h2hLabel = rows.length === 2 ? 'Innbyrdes oppgjør' : `Innbyrdes tabell mellom ${rows.length} lag`
+
+  return rows.sort((a, b) => {
+    const h2hA = headToHead.get(a.team.id)
+    const h2hB = headToHead.get(b.team.id)
+    const h2hResult = compareHeadToHeadRows(h2hA, h2hB)
+    if (h2hResult !== 0) {
+      a.headToHeadNote = h2hLabel
+      b.headToHeadNote = h2hLabel
+      return h2hResult
+    }
+
+    a.headToHeadNote = 'Innbyrdes likt – fair play er ignorert'
+    b.headToHeadNote = 'Innbyrdes likt – fair play er ignorert'
+    return a.team.name.localeCompare(b.team.name, 'nb')
+  })
+}
+
+function compareHeadToHeadRows(a, b) {
+  return b.points - a.points || b.goalDifference - a.goalDifference || b.goalsFor - a.goalsFor
+}
+
+function buildQualifiers(tables) {
+  const firstAndSecond = groupIds.flatMap((group) => [
+    {
+      seed: `${group}1`,
+      source: `Vinner gruppe ${group}`,
+      team: tables[group][0]?.team ?? null,
+      stats: tables[group][0],
+    },
+    {
+      seed: `${group}2`,
+      source: `Toer gruppe ${group}`,
+      team: tables[group][1]?.team ?? null,
+      stats: tables[group][1],
+    },
+  ])
+
+  const thirdPlaced = groupIds
+    .map((group) => ({
+      seed: `${group}3`,
+      source: `Treer gruppe ${group}`,
+      team: tables[group][2]?.team ?? null,
+      stats: tables[group][2],
+    }))
+    .sort((a, b) => compareRows(a.stats, b.stats))
+    .slice(0, 8)
+    .map((qualifier, index) => ({
+      ...qualifier,
+      seed: `B3-${index + 1}`,
+      source: `${index + 1}. beste gruppetreer (${qualifier.source})`,
+    }))
+
+  return [...firstAndSecond, ...thirdPlaced]
+}
+
+function buildRoundOf32(qualifiers) {
+  const bySeed = new Map(qualifiers.map((qualifier) => [qualifier.seed, qualifier]))
+  const rankedThirds = Array.from({ length: 8 }, (_, index) => bySeed.get(`B3-${index + 1}`)).filter(Boolean)
+  const usedThirdTeamIds = new Set()
+
+  const getSeed = (seed, source) => bySeed.get(seed) ?? placeholder(source)
+  const getThird = (allowedGroups, source) => {
+    const third = rankedThirds.find((qualifier) => {
+      const group = qualifier.team?.group ?? qualifier.stats?.team?.group
+      return group && allowedGroups.includes(group) && !usedThirdTeamIds.has(qualifier.team?.id)
+    })
+
+    if (!third?.team) return placeholder(source)
+    usedThirdTeamIds.add(third.team.id)
+    return {
+      ...third,
+      source: `${third.source} · slot ${source}`,
+    }
+  }
+
+  const roundOf32Slots = [
+    ['M73', getSeed('A2', 'Toer gruppe A'), getSeed('B2', 'Toer gruppe B')],
+    ['M74', getSeed('E1', 'Vinner gruppe E'), getThird('ABCDF', '3ABCDF')],
+    ['M75', getSeed('F1', 'Vinner gruppe F'), getSeed('C2', 'Toer gruppe C')],
+    ['M76', getSeed('C1', 'Vinner gruppe C'), getSeed('F2', 'Toer gruppe F')],
+    ['M77', getSeed('I1', 'Vinner gruppe I'), getThird('CDFGH', '3CDFGH')],
+    ['M78', getSeed('E2', 'Toer gruppe E'), getSeed('I2', 'Toer gruppe I')],
+    ['M79', getSeed('A1', 'Vinner gruppe A'), getThird('CEFHI', '3CEFHI')],
+    ['M80', getSeed('L1', 'Vinner gruppe L'), getThird('EHIJK', '3EHIJK')],
+    ['M81', getSeed('D1', 'Vinner gruppe D'), getThird('BEFIJ', '3BEFIJ')],
+    ['M82', getSeed('G1', 'Vinner gruppe G'), getThird('AEHIJ', '3AEHIJ')],
+    ['M83', getSeed('K2', 'Toer gruppe K'), getSeed('L2', 'Toer gruppe L')],
+    ['M84', getSeed('H1', 'Vinner gruppe H'), getSeed('J2', 'Toer gruppe J')],
+    ['M85', getSeed('B1', 'Vinner gruppe B'), getThird('EFGIJ', '3EFGIJ')],
+    ['M86', getSeed('J1', 'Vinner gruppe J'), getSeed('H2', 'Toer gruppe H')],
+    ['M87', getSeed('K1', 'Vinner gruppe K'), getThird('DEIJL', '3DEIJL')],
+    ['M88', getSeed('D2', 'Toer gruppe D'), getSeed('G2', 'Toer gruppe G')],
+  ]
+
+  return roundOf32Slots.map(([id, home, away]) => ({
+    id,
+    round: 'round32',
+    home,
+    away,
+  }))
+}
+
+function buildKnockoutBracket(roundOf32, winners) {
+  const matches = [...roundOf32]
+
+  const addMatch = (id, round, first, second) => {
+    matches.push({
+      id,
+      round,
+      home: winnerAsQualifier(matches.find((match) => match.id === first), winners[first]),
+      away: winnerAsQualifier(matches.find((match) => match.id === second), winners[second]),
+      dependsOn: [first, second],
+    })
+  }
+
+  const round16Slots = [
+    ['M89', 'M74', 'M77'],
+    ['M90', 'M73', 'M75'],
+    ['M91', 'M76', 'M78'],
+    ['M92', 'M79', 'M80'],
+    ['M93', 'M83', 'M84'],
+    ['M94', 'M81', 'M82'],
+    ['M95', 'M86', 'M88'],
+    ['M96', 'M85', 'M87'],
+  ]
+  const quarterSlots = [
+    ['M97', 'M89', 'M90'],
+    ['M98', 'M93', 'M94'],
+    ['M99', 'M91', 'M92'],
+    ['M100', 'M95', 'M96'],
+  ]
+  const semiSlots = [
+    ['M101', 'M97', 'M98'],
+    ['M102', 'M99', 'M100'],
+  ]
+
+  round16Slots.forEach(([id, first, second]) => addMatch(id, 'round16', first, second))
+  quarterSlots.forEach(([id, first, second]) => addMatch(id, 'quarter', first, second))
+  semiSlots.forEach(([id, first, second]) => addMatch(id, 'semi', first, second))
+  addMatch('M104', 'final', 'M101', 'M102')
+
+  return matches
+}
+
+function winnerAsQualifier(match, winnerId) {
+  const team = [match?.home, match?.away].find((side) => side?.team?.id === winnerId)
+  return team ?? placeholder(match ? `Vinner ${match.id}` : 'Vinner kamp')
+}
+
+function placeholder(source) {
+  return {
+    seed: source,
+    source,
+    team: null,
+  }
+}
+
+
+window.Tournament = {
+  buildKnockoutBracket,
+  buildQualifiers,
+  buildRoundOf32,
+  calculateTables,
+  compareRows,
+  explainTieBreaker,
+  getGroupProgress,
+  groupIds,
+  groupMatches,
+  hasValidPrediction,
+  roundLabels,
+  teamById,
+  teams,
+}
+
+    </script>
+    <script>
+(function () {
+const {
+  buildKnockoutBracket,
+  buildQualifiers,
+  buildRoundOf32,
+  calculateTables,
+  explainTieBreaker,
+  getGroupProgress,
+  groupIds,
+  groupMatches,
+  hasValidPrediction,
+  roundLabels,
+  teamById,
+  teams,
+} = window.Tournament
+
+const STORAGE_KEY = 'vm-2026-tipping-state'
+const NETLIFY_FORM_NAME = 'vm-2026-tips'
+
+const bonusQuestions = [
+  { id: 'mostGoalsTeam', label: 'Lag med flest mål totalt (hele turneringen)', suggestions: 'teams' },
+  { id: 'mostConcededTeam', label: 'Lag som slipper inn flest mål totalt (hele turneringen)', suggestions: 'teams' },
+  { id: 'scorelessTeam', label: 'Navngi ett lag som går ut av VM uten å score mål ("ingen" er gyldig svar)', suggestions: 'teamsWithNone' },
+  { id: 'roughestTeam', label: 'Råtass-laget (flest poeng for gule og røde kort)', suggestions: 'teams' },
+  { id: 'penaltyShootoutMatches', label: 'Antall sluttspillkamper som avgjøres på straffer (bruk tall, 0 er gyldig svar)', inputMode: 'numeric' },
+  { id: 'mostPenaltiesTeam', label: 'Hvilket lag får flest straffer (ikke inkludert straffesparkkonkurranse)?', suggestions: 'teams' },
+  { id: 'starGoals', label: 'Hvor mange mål skårer Mbappe, Kane og Haaland til sammen?', inputMode: 'numeric' },
+  { id: 'youngPlayer', label: 'Vinner av FIFAs young player of the tournament' },
+  { id: 'bestPlayer', label: 'Vinner av FIFAs best player of the tournament' },
+]
+
+
+const initialState = {
+  activeGroup: 'A',
+  predictions: {},
+  knockoutWinners: {},
+  customTeamNames: Object.fromEntries(teams.map((team) => [team.id, team.name])),
+  bonusAnswers: Object.fromEntries(bonusQuestions.map((question) => [question.id, ''])),
+  participant: { firstName: '', lastName: '', email: '' },
+  submission: { status: 'idle', submittedAt: '', error: '', dirtySinceSubmit: false },
+}
+
+let state = loadState()
+
+function cloneState(value) {
+  return JSON.parse(JSON.stringify(value))
+}
+
+function readStoredState() {
+  try {
+    return window.localStorage?.getItem(STORAGE_KEY)
+  } catch {
+    return null
+  }
+}
+
+function writeStoredState(nextState) {
+  try {
+    window.localStorage?.setItem(STORAGE_KEY, JSON.stringify(nextState))
+  } catch {
+    // Some browsers block localStorage for local files. The app still works for the current session.
+  }
+}
+
+function loadState() {
+  const raw = readStoredState()
+  if (!raw) return cloneState(initialState)
+
+  try {
+    return normalizeState({ ...initialState, ...JSON.parse(raw) })
+  } catch {
+    return cloneState(initialState)
+  }
+}
+
+function normalizeState(nextState) {
+  return {
+    ...nextState,
+    activeGroup: groupIds.includes(nextState.activeGroup) ? nextState.activeGroup : 'A',
+    customTeamNames: { ...initialState.customTeamNames, ...nextState.customTeamNames },
+    bonusAnswers: { ...initialState.bonusAnswers, ...nextState.bonusAnswers },
+    participant: { ...initialState.participant, ...nextState.participant },
+    submission: { ...initialState.submission, ...nextState.submission },
+  }
+}
+
+function persist(nextState, options = {}) {
+  const viewport = options.preserveViewport ? captureViewport() : null
+  state = normalizeState(nextState)
+  writeStoredState(state)
+  render()
+  if (viewport) restoreViewport(viewport)
+}
+
+function captureViewport() {
+  const activeElement = document.activeElement
+  const dataset = activeElement?.dataset ?? {}
+  return {
+    scrollX: window.scrollX,
+    scrollY: window.scrollY,
+    selector: buildRestoreSelector(dataset),
+    selectionStart: typeof activeElement?.selectionStart === 'number' ? activeElement.selectionStart : null,
+  }
+}
+
+function buildRestoreSelector(dataset) {
+  if (dataset.prediction && dataset.side) return `[data-prediction="${dataset.prediction}"][data-side="${dataset.side}"]`
+  if (dataset.bonus) return `[data-bonus="${dataset.bonus}"]`
+  if (dataset.participant) return `[data-participant="${dataset.participant}"]`
+  if (dataset.action === 'submit-tips') return '[data-action="submit-tips"]'
+  return null
+}
+
+function restoreViewport(viewport) {
+  requestAnimationFrame(() => {
+    if (viewport.selector) {
+      const nextElement = document.querySelector(viewport.selector)
+      nextElement?.focus({ preventScroll: true })
+      if (typeof viewport.selectionStart === 'number' && nextElement?.setSelectionRange) {
+        nextElement.setSelectionRange(viewport.selectionStart, viewport.selectionStart)
+      }
+    }
+    window.scrollTo(viewport.scrollX, viewport.scrollY)
+  })
+}
+
+function displayName(teamId) {
+  return state.customTeamNames[teamId] || teamById.get(teamId)?.name || 'Ukjent lag'
+}
+
+function markChangedAfterSubmit(nextState) {
+  if (state.submission.status !== 'success') return nextState
+
+  return {
+    ...nextState,
+    submission: {
+      ...nextState.submission,
+      dirtySinceSubmit: true,
+      error: '',
+    },
+  }
+}
+
+function setActiveGroup(group) {
+  persist({ ...state, activeGroup: group })
+}
+
+function updatePrediction(matchId, side, value) {
+  if (!/^\d{0,2}$/.test(value)) return
+  persist(markChangedAfterSubmit({
+    ...state,
+    predictions: {
+      ...state.predictions,
+      [matchId]: {
+        home: state.predictions[matchId]?.home ?? '',
+        away: state.predictions[matchId]?.away ?? '',
+        [side]: value,
+      },
+    },
+    knockoutWinners: {},
+  }), { preserveViewport: true })
+}
+
+
+function updateParticipant(field, value) {
+  persist(markChangedAfterSubmit({
+    ...state,
+    participant: {
+      ...state.participant,
+      [field]: value,
+    },
+  }), { preserveViewport: true })
+}
+
+
+function updateBonusAnswer(questionId, value) {
+  persist(markChangedAfterSubmit({
+    ...state,
+    bonusAnswers: {
+      ...state.bonusAnswers,
+      [questionId]: value,
+    },
+  }), { preserveViewport: true })
+}
+
+function calculatePredictedGroupGoals() {
+  return Object.values(state.predictions).reduce((total, prediction) => {
+    const homeGoals = parseBonusNumber(prediction.home)
+    const awayGoals = parseBonusNumber(prediction.away)
+    return total + homeGoals + awayGoals
+  }, 0)
+}
+
+function parseBonusNumber(value) {
+  if (value === undefined || value === null || value === '') return 0
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+
+function getSuggestionOptions(question) {
+  const teamOptions = teams.map((team) => state.customTeamNames[team.id] || team.name)
+  const suggestionGroups = {
+    teams: teamOptions,
+    teamsWithNone: ['Ingen', ...teamOptions],
+  }
+
+  return [...new Set(suggestionGroups[question.suggestions] ?? [])].filter(Boolean)
+}
+
+function normalizeAutocompleteValue(value) {
+  return value
+    .trim()
+    .toLocaleLowerCase('nb')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+}
+
+function isExactSuggestion(question, value) {
+  const normalizedValue = normalizeAutocompleteValue(value)
+  return getSuggestionOptions(question).some((option) => normalizeAutocompleteValue(option) === normalizedValue)
+}
+
+function getMatchingSuggestions(question, value) {
+  const normalizedValue = normalizeAutocompleteValue(value)
+  if (!normalizedValue || isExactSuggestion(question, value)) return []
+
+  return getSuggestionOptions(question)
+    .filter((option) => isAutocompleteMatch(option, normalizedValue))
+    .sort((a, b) => a.localeCompare(b, 'nb'))
+    .slice(0, 5)
+}
+
+function isAutocompleteMatch(option, normalizedValue) {
+  const normalizedOption = normalizeAutocompleteValue(option)
+  return normalizedOption.startsWith(normalizedValue) || normalizedOption.split(/\s+/).some((part) => part.startsWith(normalizedValue))
+}
+
+function getFallbackSuggestions(question, value) {
+  const normalizedValue = normalizeAutocompleteValue(value)
+  if (!normalizedValue) return []
+
+  return getSuggestionOptions(question)
+    .map((option) => ({ option, distance: getEditDistance(normalizedValue, normalizeAutocompleteValue(option).slice(0, normalizedValue.length + 2)) }))
+    .sort((a, b) => a.distance - b.distance || a.option.localeCompare(b.option, 'nb'))
+    .slice(0, 3)
+    .map(({ option }) => option)
+}
+
+function getEditDistance(a, b) {
+  const dp = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0))
+  for (let i = 0; i <= a.length; i += 1) dp[i][0] = i
+  for (let j = 0; j <= b.length; j += 1) dp[0][j] = j
+
+  for (let i = 1; i <= a.length; i += 1) {
+    for (let j = 1; j <= b.length; j += 1) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + cost,
+      )
+    }
+  }
+
+  return dp[a.length][b.length]
+}
+
+function getBonusValidation(question, value) {
+  if (!question.suggestions || !value.trim() || isExactSuggestion(question, value)) return ''
+  const suggestions = getMatchingSuggestions(question, value)
+  const fallbackSuggestions = suggestions.length ? suggestions : getFallbackSuggestions(question, value)
+  return `Ugyldig svar. Mente du: ${fallbackSuggestions.join(', ')}?`
+}
+
+function renderBonusInput(question) {
+  const value = state.bonusAnswers[question.id] ?? ''
+  if (question.inputMode === 'numeric') {
+    return `
+      <input
+        data-bonus="${question.id}"
+        inputmode="numeric"
+        value="${escapeAttribute(value)}"
+        aria-label="${escapeAttribute(question.label)}"
+      />
+    `
+  }
+
+  if (!question.suggestions) {
+    return `
+      <input
+        data-bonus="${question.id}"
+        value="${escapeAttribute(value)}"
+        aria-label="${escapeAttribute(question.label)}"
+      />
+    `
+  }
+
+  const suggestions = getMatchingSuggestions(question, value)
+  const validation = getBonusValidation(question, value)
+  return `
+    <div class="bonus-input-wrap">
+      <input
+        data-bonus="${question.id}"
+        autocomplete="off"
+        value="${escapeAttribute(value)}"
+        aria-label="${escapeAttribute(question.label)}"
+        aria-invalid="${validation ? 'true' : 'false'}"
+        ${validation ? `aria-describedby="bonus-error-${question.id}"` : ''}
+      />
+      ${renderAutocompleteSuggestions(question, suggestions)}
+      ${validation ? `<small class="bonus-error" id="bonus-error-${question.id}">${escapeHtml(validation)}</small>` : ''}
+    </div>
+  `
+}
+
+function renderAutocompleteSuggestions(question, suggestions) {
+  if (!suggestions.length) return ''
+
+  return `
+    <div class="autocomplete-list" role="listbox" aria-label="Forslag">
+      ${suggestions.map((suggestion) => `
+        <button type="button" data-bonus-suggestion="${question.id}" data-suggestion-value="${escapeAttribute(suggestion)}" role="option">
+          ${escapeHtml(suggestion)}
+        </button>
+      `).join('')}
+    </div>
+  `
+}
+
+
+
+function validateSubmission() {
+  const missing = []
+  if (!state.participant.firstName.trim()) missing.push('fornavn')
+  if (!state.participant.lastName.trim()) missing.push('etternavn')
+  if (!state.participant.email.trim()) missing.push('e-post')
+  if (state.participant.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.participant.email.trim())) missing.push('gyldig e-post')
+
+  return missing.length ? `Fyll ut ${missing.join(', ')} før du sender inn tipset.` : ''
+}
+
+function buildSubmissionPayload(bracket = null) {
+  const submittedAt = new Date().toISOString()
+  const matches = bracket ?? buildCurrentBracket()
+  const championId = state.knockoutWinners.M104 ?? ''
+  const championName = championId ? displayName(championId) : ''
+  const payload = {
+    formName: NETLIFY_FORM_NAME,
+    firstName: state.participant.firstName.trim(),
+    lastName: state.participant.lastName.trim(),
+    email: state.participant.email.trim(),
+    submittedAt,
+    totalGroupGoals: String(calculatePredictedGroupGoals()),
+    championId,
+    champion: championName,
+  }
+
+  groupMatches.forEach((match) => {
+    const prediction = state.predictions[match.id] ?? {}
+    payload[`match_${match.id}_home`] = prediction.home ?? ''
+    payload[`match_${match.id}_away`] = prediction.away ?? ''
+    payload[`match_${match.id}_label`] = `${displayName(match.home)} - ${displayName(match.away)}`
+  })
+
+  bonusQuestions.forEach((question) => {
+    payload[`bonus_${question.id}`] = state.bonusAnswers[question.id] ?? ''
+  })
+
+  matches.forEach((match) => {
+    const winnerId = state.knockoutWinners[match.id] ?? ''
+    payload[`knockout_${match.id}_winnerId`] = winnerId
+    payload[`knockout_${match.id}_winner`] = winnerId ? displayName(winnerId) : ''
+  })
+
+  payload.payloadJson = JSON.stringify({
+    participant: payload.firstName || payload.lastName || payload.email ? { ...state.participant } : {},
+    predictions: state.predictions,
+    bonusAnswers: state.bonusAnswers,
+    knockoutWinners: state.knockoutWinners,
+    customTeamNames: state.customTeamNames,
+    summary: {
+      submittedAt,
+      totalGroupGoals: payload.totalGroupGoals,
+      championId,
+      champion: championName,
+    },
+  })
+
+  return payload
+}
+
+function encodeFormData(payload) {
+  const formData = new URLSearchParams()
+  formData.set('form-name', NETLIFY_FORM_NAME)
+  Object.entries(payload).forEach(([key, value]) => {
+    formData.set(key, value ?? '')
+  })
+  return formData.toString()
+}
+
+function buildCurrentBracket() {
+  const tables = calculateTables(state.predictions, state.customTeamNames)
+  const qualifiers = buildQualifiers(tables)
+  const roundOf32 = buildRoundOf32(qualifiers)
+  return buildKnockoutBracket(roundOf32, state.knockoutWinners)
+}
+
+async function submitTips(bracket) {
+  const validationError = validateSubmission()
+  if (validationError) {
+    persist({
+      ...state,
+      submission: { ...state.submission, status: 'error', error: validationError },
+    })
+    return
+  }
+
+  const payload = buildSubmissionPayload(bracket)
+  persist({
+    ...state,
+    submission: { ...state.submission, status: 'sending', error: '' },
+  }, { preserveViewport: true })
+
+  try {
+    const response = await fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: encodeFormData(payload),
+    })
+
+    if (!response.ok) throw new Error(`Netlify svarte med ${response.status}`)
+
+    persist({
+      ...state,
+      submission: { status: 'success', submittedAt: payload.submittedAt, error: '', dirtySinceSubmit: false },
+    })
+  } catch (error) {
+    persist({
+      ...state,
+      submission: {
+        ...state.submission,
+        status: 'error',
+        error: `Kunne ikke sende inn. Prøv igjen fra Netlify-siden. Teknisk feilmelding: ${error.message}`,
+      },
+    })
+  }
+}
+
+function renderSubmissionPanel(bracket) {
+  const validationError = validateSubmission()
+  const isSending = state.submission.status === 'sending'
+  const submittedAt = state.submission.submittedAt ? new Date(state.submission.submittedAt).toLocaleString('nb-NO') : ''
+  const championName = state.knockoutWinners.M104 ? displayName(state.knockoutWinners.M104) : 'Ikke valgt'
+  const statusClass = state.submission.status === 'success' && !state.submission.dirtySinceSubmit ? 'success' : state.submission.status === 'error' ? 'error' : 'info'
+  let statusText = 'Tipsene lagres automatisk i nettleseren din. Trykk på knappen når du er klar til å sende dem inn til konkurransen.'
+
+  if (state.submission.status === 'sending') statusText = 'Sender tipset ditt til Netlify …'
+  if (state.submission.status === 'success') statusText = `Tips sendt inn${submittedAt ? ` ${submittedAt}` : ''}.`
+  if (state.submission.dirtySinceSubmit) statusText = 'Du har endret tips etter siste innsending. Send inn på nytt for at endringene skal gjelde.'
+  if (state.submission.status === 'error') statusText = state.submission.error
+
+  return `
+    <section class="panel submit-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Siste steg</p>
+          <h2>Send inn tipset ditt</h2>
+        </div>
+        <p>Innsendingen lagres i Netlify Forms slik at arrangøren kan eksportere alle tips, navn og e-poster som CSV.</p>
+      </div>
+      <div class="submit-summary">
+        <div>
+          <span>Deltaker</span>
+          <strong>${escapeHtml([state.participant.firstName, state.participant.lastName].filter(Boolean).join(' ') || 'Mangler navn')}</strong>
+          <small>${escapeHtml(state.participant.email || 'Mangler e-post')}</small>
+        </div>
+        <div>
+          <span>Kamptips</span>
+          <strong>${groupMatches.filter((match) => hasValidPrediction(state.predictions[match.id])).length}/${groupMatches.length}</strong>
+          <small>utfylte gruppespillkamper</small>
+        </div>
+        <div>
+          <span>Mester</span>
+          <strong>${escapeHtml(championName)}</strong>
+          <small>fra sluttspillbracketen</small>
+        </div>
+      </div>
+      <div class="submission-status ${statusClass}" role="status">${escapeHtml(statusText)}</div>
+      ${validationError ? `<p class="submit-help">${escapeHtml(validationError)}</p>` : ''}
+      <button class="submit-button" data-action="submit-tips" ${isSending ? 'disabled' : ''}>${isSending ? 'Sender …' : 'Send inn tips'}</button>
+      <p class="submit-note">Tipsene kan fortsatt endres lokalt etter innsending, men da må du sende inn på nytt for at Netlify skal få den nye versjonen.</p>
+    </section>
+  `
+}
+
+function selectWinner(match, teamId, bracket) {
+  const nextWinners = { ...state.knockoutWinners, [match.id]: teamId }
+  const matchIndex = bracket.findIndex((candidate) => candidate.id === match.id)
+
+  bracket.slice(matchIndex + 1).forEach((laterMatch) => {
+    const validIds = [laterMatch.home?.team?.id, laterMatch.away?.team?.id]
+    if (nextWinners[laterMatch.id] && !validIds.includes(nextWinners[laterMatch.id])) {
+      delete nextWinners[laterMatch.id]
+    }
+  })
+
+  persist(markChangedAfterSubmit({ ...state, knockoutWinners: nextWinners }))
+}
+
+function goToRelativeGroup(direction) {
+  const currentIndex = groupIds.indexOf(state.activeGroup)
+  const nextIndex = Math.min(groupIds.length - 1, Math.max(0, currentIndex + direction))
+  setActiveGroup(groupIds[nextIndex])
+}
+
+function resetAll() {
+  persist(cloneState(initialState))
+}
+
+function render() {
+  const app = document.querySelector('#root')
+  if (!app) return
+  const tables = calculateTables(state.predictions, state.customTeamNames)
+  const qualifiers = buildQualifiers(tables)
+  const roundOf32 = buildRoundOf32(qualifiers)
+  const bracket = buildKnockoutBracket(roundOf32, state.knockoutWinners)
+  const completedGroupMatches = groupMatches.filter((match) => hasValidPrediction(state.predictions[match.id])).length
+  const champion = bracket.find((match) => match.id === 'M104')
+  const championName = state.knockoutWinners.M104 ? displayName(state.knockoutWinners.M104) : 'Ikke kåret ennå'
+  const activeProgress = getGroupProgress(state.activeGroup, state.predictions)
+
+  app.innerHTML = `
+    <main>
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Deloitte · VM 2026 tippekonkurranse</p>
+          <h1>Tipp én gruppe av gangen – se tabellen endre seg direkte</h1>
+          <p>
+            Fyll inn konkrete resultater, for eksempel 3–1 til Frankrike over Norge. Appen rangerer lagene gruppe for gruppe,
+            bruker innbyrdes oppgjør der det er poenglikhet, og sender gruppevinnere, gruppetoere og de åtte beste treerne videre.
+          </p>
+        </div>
+        <aside class="status-card">
+          <span>${completedGroupMatches} / ${groupMatches.length}</span>
+          <strong>gruppekamper tippet</strong>
+          <small>Aktiv gruppe ${state.activeGroup}: ${activeProgress.completed}/${activeProgress.total} kamper</small>
+          <small>Mester: ${escapeHtml(championName)}</small>
+          ${champion?.home?.team && champion?.away?.team ? `<small>Finale: ${escapeHtml(champion.home.team.name)} – ${escapeHtml(champion.away.team.name)}</small>` : ''}
+          <button data-action="reset">Nullstill demo</button>
+        </aside>
+      </section>
+
+      <section class="panel participant-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Deltaker</p>
+            <h2>Hvem leverer tipset?</h2>
+          </div>
+          <p>Fyll ut fornavn, etternavn og e-post før du deler eller leverer tipset.</p>
+        </div>
+        <div class="participant-grid">
+          <label>
+            <span>Fornavn</span>
+            <input data-participant="firstName" value="${escapeAttribute(state.participant.firstName)}" autocomplete="given-name" aria-label="Fornavn" />
+          </label>
+          <label>
+            <span>Etternavn</span>
+            <input data-participant="lastName" value="${escapeAttribute(state.participant.lastName)}" autocomplete="family-name" aria-label="Etternavn" />
+          </label>
+          <label>
+            <span>E-post</span>
+            <input data-participant="email" type="email" value="${escapeAttribute(state.participant.email)}" autocomplete="email" aria-label="E-post" />
+          </label>
+        </div>
+      </section>
+
+      <section class="panel group-flow-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Steg 1 og 2</p>
+            <h2>Tipp hele gruppe ${state.activeGroup} før du går videre</h2>
+          </div>
+          <p>
+            Velg gruppe i rekkefølge A–L. Tabellen til høyre oppdateres etter hvert resultat og viser hvilken tie-breaker som er i bruk.
+          </p>
+        </div>
+        ${renderGroupTabs()}
+        ${renderActiveGroup(tables[state.activeGroup])}
+      </section>
+
+      <section class="panel rules-panel">
+        <div>
+          <p class="eyebrow">Tie-breakere</p>
+          <h2>Reglene som hensyntas</h2>
+        </div>
+        <ol>
+          <li>Poeng i gruppen.</li>
+          <li>Total målforskjell i gruppen.</li>
+          <li>Totalt scorede mål i gruppen.</li>
+          <li>Innbyrdes poeng, innbyrdes målforskjell og innbyrdes scorede mål for lag som fortsatt står likt.</li>
+          <li>Fair play finnes i FIFAs offisielle regler, men er bevisst ignorert i denne tippeappen.</li>
+        </ol>
+      </section>
+
+      <section class="panel bonus-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Bonusspørsmål</p>
+            <h2>Ekstra tips</h2>
+          </div>
+          <p>Disse svarene lagres sammen med resten av tipset ditt.</p>
+        </div>
+        ${renderBonusQuestions(calculatePredictedGroupGoals())}
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Steg 3</p>
+            <h2>Sluttspill</h2>
+          </div>
+          <p>Velg vinner i hver kamp. Neste runde fylles ut automatisk basert på valgene dine.</p>
+        </div>
+        <div class="bracket">
+          ${['round32', 'round16', 'quarter', 'semi', 'final'].map((round) => renderRound(round, bracket)).join('')}
+        </div>
+      </section>
+
+      ${renderSubmissionPanel(bracket)}
+    </main>
+  `
+
+  app.querySelector('[data-action="reset"]')?.addEventListener('click', resetAll)
+  app.querySelector('[data-action="submit-tips"]')?.addEventListener('click', () => submitTips(bracket))
+  app.querySelectorAll('[data-group]').forEach((button) => {
+    button.addEventListener('click', (event) => setActiveGroup(event.currentTarget.dataset.group))
+  })
+  app.querySelectorAll('[data-group-step]').forEach((button) => {
+    button.addEventListener('click', (event) => goToRelativeGroup(Number(event.currentTarget.dataset.groupStep)))
+  })
+  app.querySelectorAll('[data-participant]').forEach((input) => {
+    input.addEventListener('input', (event) => updateParticipant(event.target.dataset.participant, event.target.value))
+  })
+  app.querySelectorAll('[data-bonus]').forEach((input) => {
+    input.addEventListener('input', (event) => updateBonusAnswer(event.target.dataset.bonus, event.target.value))
+  })
+  app.querySelectorAll('[data-bonus-suggestion]').forEach((button) => {
+    button.addEventListener('click', (event) => updateBonusAnswer(event.currentTarget.dataset.bonusSuggestion, event.currentTarget.dataset.suggestionValue))
+  })
+  app.querySelectorAll('[data-prediction]').forEach((input) => {
+    input.addEventListener('input', (event) => updatePrediction(event.target.dataset.prediction, event.target.dataset.side, event.target.value))
+  })
+  app.querySelectorAll('[data-winner]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      const match = bracket.find((candidate) => candidate.id === event.currentTarget.dataset.match)
+      if (match) selectWinner(match, event.currentTarget.dataset.winner, bracket)
+    })
+  })
+}
+
+function renderGroupTabs() {
+  return `
+    <div class="group-tabs" aria-label="Velg gruppe">
+      ${groupIds.map((group) => {
+        const progress = getGroupProgress(group, state.predictions)
+        const isActive = group === state.activeGroup
+        return `
+          <button class="${isActive ? 'active' : ''}" data-group="${group}" aria-pressed="${isActive}">
+            <strong>${group}</strong>
+            <span>${progress.completed}/${progress.total}</span>
+          </button>
+        `
+      }).join('')}
+    </div>
+  `
+}
+
+
+function renderBonusQuestions(totalGroupGoals) {
+  return `
+    <div class="bonus-grid">
+      <label class="bonus-result">
+        <span>1. Du har tippet følgende totalt antall mål i gruppespillet</span>
+        <strong>${totalGroupGoals}</strong>
+      </label>
+      ${bonusQuestions.map((question, index) => `
+        <label class="bonus-question">
+          <span>${index + 2}. ${escapeHtml(question.label)}</span>
+          ${renderBonusInput(question)}
+        </label>
+      `).join('')}
+    </div>
+  `
+}
+
+
+function renderActiveGroup(table) {
+  const currentIndex = groupIds.indexOf(state.activeGroup)
+  return `
+    <div class="active-group-layout">
+      <article class="predict-card">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">Gruppe ${state.activeGroup}</p>
+            <h3>Resultattips</h3>
+          </div>
+          <div class="group-nav">
+            <button data-group-step="-1" ${currentIndex === 0 ? 'disabled' : ''}>Forrige</button>
+            <button data-group-step="1" ${currentIndex === groupIds.length - 1 ? 'disabled' : ''}>Neste gruppe</button>
+          </div>
+        </div>
+        <div class="matches featured-matches">
+          ${groupMatches.filter((match) => match.group === state.activeGroup).map(renderMatchRow).join('')}
+        </div>
+      </article>
+
+      <article class="table-card">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">Live tabell</p>
+            <h3>Gruppe ${state.activeGroup}</h3>
+          </div>
+          <span class="legend"><i></i> videre · <i></i> mulig beste treer</span>
+        </div>
+        ${renderTable(table)}
+      </article>
+    </div>
+  `
+}
+
+
+function renderTable(table) {
+  return `
+    <table>
+      <thead>
+        <tr><th>#</th><th>Lag</th><th>P</th><th>MF</th><th>M</th><th>Tie-break</th></tr>
+      </thead>
+      <tbody>
+        ${table.map((row, index) => `
+          <tr class="${index < 2 ? 'qualified' : index === 2 ? 'third' : ''}">
+            <td>${index + 1}</td>
+            <td>${escapeHtml(row.team.name)}</td>
+            <td>${row.points}</td>
+            <td>${row.goalDifference}</td>
+            <td>${row.goalsFor}-${row.goalsAgainst}</td>
+            <td>${escapeHtml(explainTieBreaker(row, table))}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `
+}
+
+function renderMatchRow(match) {
+  const prediction = state.predictions[match.id] ?? { home: '', away: '' }
+  return `
+    <div class="match-row">
+      <div class="match-meta">
+        <strong>${escapeHtml(match.date)} · ${escapeHtml(match.time)}</strong>
+        <small>${escapeHtml(match.venue)}</small>
+      </div>
+      <span>${escapeHtml(displayName(match.home))}</span>
+      <input aria-label="${escapeAttribute(displayName(match.home))} mål" inputmode="numeric" data-prediction="${match.id}" data-side="home" value="${escapeAttribute(prediction.home)}" />
+      <span class="dash">–</span>
+      <input aria-label="${escapeAttribute(displayName(match.away))} mål" inputmode="numeric" data-prediction="${match.id}" data-side="away" value="${escapeAttribute(prediction.away)}" />
+      <span>${escapeHtml(displayName(match.away))}</span>
+    </div>
+  `
+}
+
+function renderRound(round, bracket) {
+  return `
+    <div class="round">
+      <h3>${roundLabels[round]}</h3>
+      ${bracket.filter((match) => match.round === round).map((match) => renderKnockoutMatch(match)).join('')}
+    </div>
+  `
+}
+
+function renderKnockoutMatch(match) {
+  return `
+    <article class="knockout-match">
+      <small>${match.id}</small>
+      ${[match.home, match.away].map((side) => renderKnockoutSide(match, side)).join('')}
+    </article>
+  `
+}
+
+function renderKnockoutSide(match, side) {
+  const disabled = !side?.team
+  const selected = side?.team?.id === state.knockoutWinners[match.id]
+  return `
+    <button
+      class="${selected ? 'selected' : ''}"
+      ${disabled ? 'disabled' : ''}
+      ${side?.team ? `data-match="${match.id}" data-winner="${side.team.id}"` : ''}
+    >
+      <span>${escapeHtml(side?.team?.name ?? side?.source ?? 'Venter på vinner')}</span>
+      <em>${escapeHtml(side?.source ?? '')}</em>
+    </button>
+  `
+}
+
+function escapeHtml(value = '') {
+  return String(value).replace(/[&<>'"]/g, (character) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#039;',
+    '"': '&quot;',
+  })[character])
+}
+
+function escapeAttribute(value = '') {
+  return escapeHtml(value)
+}
+
+function showStartupError(message) {
+  const app = document.querySelector('#root')
+  if (!app || app.children.length) return
+  app.innerHTML = `
+    <main>
+      <section class="panel">
+        <p class="eyebrow">Feil ved oppstart</p>
+        <h1>Appen kunne ikke starte i denne nettleseren</h1>
+        <p>Prøv å åpne <strong>vm-2026-tipping.html</strong> i Chrome, Edge, Firefox eller Safari etter at ZIP-filen er pakket ut.</p>
+        <pre>${escapeHtml(message || 'Ukjent feil')}</pre>
+      </section>
+    </main>
+  `
+}
+
+window.addEventListener('error', (event) => {
+  showStartupError(event.message)
+})
+
+try {
+  render()
+} catch (error) {
+  showStartupError(error.message)
+}
+})()
+
+    </script>
+  </body>
+</html>
