@@ -334,6 +334,49 @@ input:focus {
   font-size: 1.3rem;
 }
 
+.bonus-input-wrap {
+  position: relative;
+  display: grid;
+  gap: 6px;
+}
+
+.bonus-input-wrap input[aria-invalid='true'] {
+  border-color: #d4351c;
+  outline: 3px solid rgba(212, 53, 28, 0.14);
+}
+
+.autocomplete-list {
+  display: grid;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--deloitte-gray-200);
+  background: var(--white);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+.autocomplete-list button {
+  width: 100%;
+  border: 0;
+  padding: 8px 10px;
+  color: var(--deloitte-black);
+  background: var(--deloitte-gray-100);
+  text-align: left;
+  font-weight: 800;
+}
+
+.autocomplete-list button:hover,
+.autocomplete-list button:focus {
+  background: var(--deloitte-green);
+  outline: 0;
+}
+
+.bonus-error {
+  color: #d4351c;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
 
 table {
   width: 100%;

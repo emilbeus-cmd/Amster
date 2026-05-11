@@ -199,31 +199,125 @@ function parseBonusNumber(value) {
 }
 
 
-function getBonusSuggestionList(question) {
-  if (question.inputMode === 'numeric') return ''
-  return `list="${getSuggestionListId(question)}"`
-}
-
-function getSuggestionListId(question) {
-  return `suggestions-${question.suggestions ?? 'players'}`
-}
-
-function renderSuggestionLists() {
+function getSuggestionOptions(question) {
   const teamOptions = teams.map((team) => state.customTeamNames[team.id] || team.name)
+  const suggestionGroups = {
+    teams: teamOptions,
+    teamsWithNone: ['Ingen', ...teamOptions],
+    players: playerSuggestions,
+    youngPlayers: youngPlayerSuggestions,
+  }
+
+  return [...new Set(suggestionGroups[question.suggestions] ?? [])].filter(Boolean)
+}
+
+function normalizeAutocompleteValue(value) {
+  return value
+    .trim()
+    .toLocaleLowerCase('nb')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+}
+
+function isExactSuggestion(question, value) {
+  const normalizedValue = normalizeAutocompleteValue(value)
+  return getSuggestionOptions(question).some((option) => normalizeAutocompleteValue(option) === normalizedValue)
+}
+
+function getMatchingSuggestions(question, value) {
+  const normalizedValue = normalizeAutocompleteValue(value)
+  if (!normalizedValue || isExactSuggestion(question, value)) return []
+
+  return getSuggestionOptions(question)
+    .filter((option) => isAutocompleteMatch(option, normalizedValue))
+    .sort((a, b) => a.localeCompare(b, 'nb'))
+    .slice(0, 5)
+}
+
+function isAutocompleteMatch(option, normalizedValue) {
+  const normalizedOption = normalizeAutocompleteValue(option)
+  return normalizedOption.startsWith(normalizedValue) || normalizedOption.split(/\s+/).some((part) => part.startsWith(normalizedValue))
+}
+
+function getFallbackSuggestions(question, value) {
+  const normalizedValue = normalizeAutocompleteValue(value)
+  if (!normalizedValue) return []
+
+  return getSuggestionOptions(question)
+    .map((option) => ({ option, distance: getEditDistance(normalizedValue, normalizeAutocompleteValue(option).slice(0, normalizedValue.length + 2)) }))
+    .sort((a, b) => a.distance - b.distance || a.option.localeCompare(b.option, 'nb'))
+    .slice(0, 3)
+    .map(({ option }) => option)
+}
+
+function getEditDistance(a, b) {
+  const dp = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0))
+  for (let i = 0; i <= a.length; i += 1) dp[i][0] = i
+  for (let j = 0; j <= b.length; j += 1) dp[0][j] = j
+
+  for (let i = 1; i <= a.length; i += 1) {
+    for (let j = 1; j <= b.length; j += 1) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + cost,
+      )
+    }
+  }
+
+  return dp[a.length][b.length]
+}
+
+function getBonusValidation(question, value) {
+  if (!question.suggestions || !value.trim() || isExactSuggestion(question, value)) return ''
+  const suggestions = getMatchingSuggestions(question, value)
+  const fallbackSuggestions = suggestions.length ? suggestions : getFallbackSuggestions(question, value)
+  return `Ugyldig svar. Mente du: ${fallbackSuggestions.join(', ')}?`
+}
+
+function renderBonusInput(question) {
+  const value = state.bonusAnswers[question.id] ?? ''
+  if (question.inputMode === 'numeric') {
+    return `
+      <input
+        data-bonus="${question.id}"
+        inputmode="numeric"
+        value="${escapeAttribute(value)}"
+        aria-label="${escapeAttribute(question.label)}"
+      />
+    `
+  }
+
+  const suggestions = getMatchingSuggestions(question, value)
+  const validation = getBonusValidation(question, value)
   return `
-    ${renderDatalist('suggestions-teams', teamOptions)}
-    ${renderDatalist('suggestions-teamsWithNone', ['Ingen', ...teamOptions])}
-    ${renderDatalist('suggestions-players', playerSuggestions)}
-    ${renderDatalist('suggestions-youngPlayers', youngPlayerSuggestions)}
+    <div class="bonus-input-wrap">
+      <input
+        data-bonus="${question.id}"
+        autocomplete="off"
+        value="${escapeAttribute(value)}"
+        aria-label="${escapeAttribute(question.label)}"
+        aria-invalid="${validation ? 'true' : 'false'}"
+        ${validation ? `aria-describedby="bonus-error-${question.id}"` : ''}
+      />
+      ${renderAutocompleteSuggestions(question, suggestions)}
+      ${validation ? `<small class="bonus-error" id="bonus-error-${question.id}">${escapeHtml(validation)}</small>` : ''}
+    </div>
   `
 }
 
-function renderDatalist(id, options) {
-  const uniqueOptions = [...new Set(options)].filter(Boolean).sort((a, b) => a.localeCompare(b, 'nb'))
+function renderAutocompleteSuggestions(question, suggestions) {
+  if (!suggestions.length) return ''
+
   return `
-    <datalist id="${id}">
-      ${uniqueOptions.map((option) => `<option value="${escapeAttribute(option)}"></option>`).join('')}
-    </datalist>
+    <div class="autocomplete-list" role="listbox" aria-label="Forslag">
+      ${suggestions.map((suggestion) => `
+        <button type="button" data-bonus-suggestion="${question.id}" data-suggestion-value="${escapeAttribute(suggestion)}" role="option">
+          ${escapeHtml(suggestion)}
+        </button>
+      `).join('')}
+    </div>
   `
 }
 
@@ -349,6 +443,9 @@ function render() {
   app.querySelectorAll('[data-bonus]').forEach((input) => {
     input.addEventListener('input', (event) => updateBonusAnswer(event.target.dataset.bonus, event.target.value))
   })
+  app.querySelectorAll('[data-bonus-suggestion]').forEach((button) => {
+    button.addEventListener('click', (event) => updateBonusAnswer(event.currentTarget.dataset.bonusSuggestion, event.currentTarget.dataset.suggestionValue))
+  })
   app.querySelectorAll('[data-prediction]').forEach((input) => {
     input.addEventListener('input', (event) => updatePrediction(event.target.dataset.prediction, event.target.dataset.side, event.target.value))
   })
@@ -388,17 +485,10 @@ function renderBonusQuestions(totalGroupGoals) {
       ${bonusQuestions.map((question, index) => `
         <label class="bonus-question">
           <span>${index + 2}. ${escapeHtml(question.label)}</span>
-          <input
-            data-bonus="${question.id}"
-            inputmode="${question.inputMode ?? 'text'}"
-            ${getBonusSuggestionList(question)}
-            value="${escapeAttribute(state.bonusAnswers[question.id] ?? '')}"
-            aria-label="${escapeAttribute(question.label)}"
-          />
+          ${renderBonusInput(question)}
         </label>
       `).join('')}
     </div>
-    ${renderSuggestionLists()}
   `
 }
 
