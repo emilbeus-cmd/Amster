@@ -1008,15 +1008,48 @@ const {
 const STORAGE_KEY = 'vm-2026-tipping-state'
 
 const bonusQuestions = [
-  { id: 'mostGoalsTeam', label: 'Lag med flest mål totalt (hele turneringen)' },
-  { id: 'mostConcededTeam', label: 'Lag som slipper inn flest mål totalt (hele turneringen)' },
-  { id: 'scorelessTeam', label: 'Navngi ett lag som går ut av VM uten å score mål ("ingen" er gyldig svar)' },
-  { id: 'roughestTeam', label: 'Råtass-laget (flest poeng for gule og røde kort)' },
+  { id: 'mostGoalsTeam', label: 'Lag med flest mål totalt (hele turneringen)', suggestions: 'teams' },
+  { id: 'mostConcededTeam', label: 'Lag som slipper inn flest mål totalt (hele turneringen)', suggestions: 'teams' },
+  { id: 'scorelessTeam', label: 'Navngi ett lag som går ut av VM uten å score mål ("ingen" er gyldig svar)', suggestions: 'teamsWithNone' },
+  { id: 'roughestTeam', label: 'Råtass-laget (flest poeng for gule og røde kort)', suggestions: 'teams' },
   { id: 'penaltyShootoutMatches', label: 'Antall sluttspillkamper som avgjøres på straffer (bruk tall, 0 er gyldig svar)', inputMode: 'numeric' },
-  { id: 'mostPenaltiesTeam', label: 'Hvilket lag får flest straffer (ikke inkludert straffesparkkonkurranse)?' },
+  { id: 'mostPenaltiesTeam', label: 'Hvilket lag får flest straffer (ikke inkludert straffesparkkonkurranse)?', suggestions: 'teams' },
   { id: 'starGoals', label: 'Hvor mange mål skårer Mbappe, Kane og Haaland til sammen?', inputMode: 'numeric' },
-  { id: 'youngPlayer', label: 'Vinner av FIFAs young player of the tournament' },
-  { id: 'bestPlayer', label: 'Vinner av FIFAs best player of the tournament' },
+  { id: 'youngPlayer', label: 'Vinner av FIFAs young player of the tournament', suggestions: 'youngPlayers' },
+  { id: 'bestPlayer', label: 'Vinner av FIFAs best player of the tournament', suggestions: 'players' },
+]
+
+const playerSuggestions = [
+  'Kylian Mbappe',
+  'Harry Kane',
+  'Erling Haaland',
+  'Lionel Messi',
+  'Jude Bellingham',
+  'Vinicius Junior',
+  'Lamine Yamal',
+  'Florian Wirtz',
+  'Jamal Musiala',
+  'Phil Foden',
+  'Bukayo Saka',
+  'Pedri',
+  'Gavi',
+  'Rodri',
+  'Bruno Fernandes',
+  'Cristiano Ronaldo',
+  'Lautaro Martinez',
+]
+
+const youngPlayerSuggestions = [
+  'Lamine Yamal',
+  'Jude Bellingham',
+  'Florian Wirtz',
+  'Jamal Musiala',
+  'Endrick',
+  'Kobbie Mainoo',
+  'Arda Güler',
+  'Warren Zaïre-Emery',
+  'Gavi',
+  'Pedri',
 ]
 
 const initialState = {
@@ -1154,6 +1187,35 @@ function parseBonusNumber(value) {
   if (value === undefined || value === null || value === '') return 0
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : 0
+}
+
+
+function getBonusSuggestionList(question) {
+  if (question.inputMode === 'numeric') return ''
+  return `list="${getSuggestionListId(question)}"`
+}
+
+function getSuggestionListId(question) {
+  return `suggestions-${question.suggestions ?? 'players'}`
+}
+
+function renderSuggestionLists() {
+  const teamOptions = teams.map((team) => state.customTeamNames[team.id] || team.name)
+  return `
+    ${renderDatalist('suggestions-teams', teamOptions)}
+    ${renderDatalist('suggestions-teamsWithNone', ['Ingen', ...teamOptions])}
+    ${renderDatalist('suggestions-players', playerSuggestions)}
+    ${renderDatalist('suggestions-youngPlayers', youngPlayerSuggestions)}
+  `
+}
+
+function renderDatalist(id, options) {
+  const uniqueOptions = [...new Set(options)].filter(Boolean).sort((a, b) => a.localeCompare(b, 'nb'))
+  return `
+    <datalist id="${id}">
+      ${uniqueOptions.map((option) => `<option value="${escapeAttribute(option)}"></option>`).join('')}
+    </datalist>
+  `
 }
 
 
@@ -1320,12 +1382,14 @@ function renderBonusQuestions(totalGroupGoals) {
           <input
             data-bonus="${question.id}"
             inputmode="${question.inputMode ?? 'text'}"
+            ${getBonusSuggestionList(question)}
             value="${escapeAttribute(state.bonusAnswers[question.id] ?? '')}"
             aria-label="${escapeAttribute(question.label)}"
           />
         </label>
       `).join('')}
     </div>
+    ${renderSuggestionLists()}
   `
 }
 
