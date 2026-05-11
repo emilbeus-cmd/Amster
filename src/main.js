@@ -21,7 +21,6 @@ const initialState = {
   predictions: {},
   knockoutWinners: {},
   customTeamNames: Object.fromEntries(teams.map((team) => [team.id, team.name])),
-  teamMeta: Object.fromEntries(teams.map((team) => [team.id, { conductScore: 0, fifaRank: 999 }])),
 }
 
 let state = loadState()
@@ -62,14 +61,45 @@ function normalizeState(nextState) {
     ...nextState,
     activeGroup: groupIds.includes(nextState.activeGroup) ? nextState.activeGroup : 'A',
     customTeamNames: { ...initialState.customTeamNames, ...nextState.customTeamNames },
-    teamMeta: { ...initialState.teamMeta, ...nextState.teamMeta },
   }
 }
 
-function persist(nextState) {
+function persist(nextState, options = {}) {
+  const viewport = options.preserveViewport ? captureViewport() : null
   state = normalizeState(nextState)
   writeStoredState(state)
   render()
+  if (viewport) restoreViewport(viewport)
+}
+
+function captureViewport() {
+  const activeElement = document.activeElement
+  const dataset = activeElement?.dataset ?? {}
+  return {
+    scrollX: window.scrollX,
+    scrollY: window.scrollY,
+    selector: buildRestoreSelector(dataset),
+    selectionStart: typeof activeElement?.selectionStart === 'number' ? activeElement.selectionStart : null,
+  }
+}
+
+function buildRestoreSelector(dataset) {
+  if (dataset.prediction && dataset.side) return `[data-prediction="${dataset.prediction}"][data-side="${dataset.side}"]`
+  if (dataset.teamInput) return `[data-team-input="${dataset.teamInput}"]`
+  return null
+}
+
+function restoreViewport(viewport) {
+  requestAnimationFrame(() => {
+    if (viewport.selector) {
+      const nextElement = document.querySelector(viewport.selector)
+      nextElement?.focus({ preventScroll: true })
+      if (typeof viewport.selectionStart === 'number' && nextElement?.setSelectionRange) {
+        nextElement.setSelectionRange(viewport.selectionStart, viewport.selectionStart)
+      }
+    }
+    window.scrollTo(viewport.scrollX, viewport.scrollY)
+  })
 }
 
 function displayName(teamId) {
@@ -93,7 +123,7 @@ function updatePrediction(matchId, side, value) {
       },
     },
     knockoutWinners: {},
-  })
+  }, { preserveViewport: true })
 }
 
 function updateTeamName(teamId, value) {
@@ -104,22 +134,7 @@ function updateTeamName(teamId, value) {
       [teamId]: value,
     },
     knockoutWinners: {},
-  })
-}
-
-function updateTeamMeta(teamId, field, value) {
-  if (value !== '' && !/^-?\d{0,4}$/.test(value)) return
-  persist({
-    ...state,
-    teamMeta: {
-      ...state.teamMeta,
-      [teamId]: {
-        ...state.teamMeta[teamId],
-        [field]: value === '' ? '' : Number(value),
-      },
-    },
-    knockoutWinners: {},
-  })
+  }, { preserveViewport: true })
 }
 
 function selectWinner(match, teamId, bracket) {
@@ -149,7 +164,7 @@ function resetAll() {
 function render() {
   const app = document.querySelector('#root')
   if (!app) return
-  const tables = calculateTables(state.predictions, state.customTeamNames, state.teamMeta)
+  const tables = calculateTables(state.predictions, state.customTeamNames)
   const qualifiers = buildQualifiers(tables)
   const roundOf32 = buildRoundOf32(qualifiers)
   const bracket = buildKnockoutBracket(roundOf32, state.knockoutWinners)
@@ -199,11 +214,11 @@ function render() {
           <h2>Reglene som hensyntas</h2>
         </div>
         <ol>
-          <li>Poeng i innbyrdes kamper mellom lag som står likt.</li>
-          <li>Målforskjell i de innbyrdes kampene.</li>
-          <li>Scorede mål i de innbyrdes kampene.</li>
-          <li>Total målforskjell og deretter totalt scorede mål i gruppen.</li>
-          <li>Valgfri fair play-score og FIFA-ranking kan fylles inn for å skille lag som fortsatt er like.</li>
+          <li>Poeng i gruppen.</li>
+          <li>Total målforskjell i gruppen.</li>
+          <li>Totalt scorede mål i gruppen.</li>
+          <li>Innbyrdes poeng, innbyrdes målforskjell og innbyrdes scorede mål for lag som fortsatt står likt.</li>
+          <li>Fair play finnes i FIFAs offisielle regler, men er bevisst ignorert i denne tippeappen.</li>
         </ol>
       </section>
 
@@ -231,9 +246,6 @@ function render() {
   })
   app.querySelectorAll('[data-team-input]').forEach((input) => {
     input.addEventListener('input', (event) => updateTeamName(event.target.dataset.teamInput, event.target.value))
-  })
-  app.querySelectorAll('[data-meta-field]').forEach((input) => {
-    input.addEventListener('input', (event) => updateTeamMeta(event.target.dataset.teamId, event.target.dataset.metaField, event.target.value))
   })
   app.querySelectorAll('[data-prediction]').forEach((input) => {
     input.addEventListener('input', (event) => updatePrediction(event.target.dataset.prediction, event.target.dataset.side, event.target.value))
@@ -298,8 +310,8 @@ function renderActiveGroup(table) {
       <article class="team-settings-card">
         <div class="card-heading">
           <div>
-            <p class="eyebrow">Lag og tie-break</p>
-            <h3>Juster gruppe ${state.activeGroup}</h3>
+            <p class="eyebrow">Lag</p>
+            <h3>Juster lagnavn i gruppe ${state.activeGroup}</h3>
           </div>
         </div>
         <div class="team-settings-grid">
@@ -311,13 +323,10 @@ function renderActiveGroup(table) {
 }
 
 function renderTeamSetting(team) {
-  const meta = state.teamMeta[team.id] ?? { conductScore: 0, fifaRank: 999 }
   return `
     <label class="team-setting">
       <span>${team.id}</span>
       <input data-team-input="${team.id}" value="${escapeAttribute(state.customTeamNames[team.id])}" aria-label="Navn for ${team.id}" />
-      <input data-team-id="${team.id}" data-meta-field="conductScore" value="${escapeAttribute(meta.conductScore)}" aria-label="Fair play-score for ${team.id}" title="Fair play-score: høyere er bedre" />
-      <input data-team-id="${team.id}" data-meta-field="fifaRank" value="${escapeAttribute(meta.fifaRank)}" aria-label="FIFA-ranking for ${team.id}" title="FIFA-ranking: lavere er bedre" />
     </label>
   `
 }
@@ -348,6 +357,10 @@ function renderMatchRow(match) {
   const prediction = state.predictions[match.id] ?? { home: '', away: '' }
   return `
     <div class="match-row">
+      <div class="match-meta">
+        <strong>${escapeHtml(match.date)} · ${escapeHtml(match.time)}</strong>
+        <small>${escapeHtml(match.venue)}</small>
+      </div>
       <span>${escapeHtml(displayName(match.home))}</span>
       <input aria-label="${escapeAttribute(displayName(match.home))} mål" inputmode="numeric" data-prediction="${match.id}" data-side="home" value="${escapeAttribute(prediction.home)}" />
       <span class="dash">–</span>

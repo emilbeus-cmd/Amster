@@ -271,7 +271,7 @@ input:focus {
 
 .match-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 54px 18px 54px minmax(0, 1fr);
+  grid-template-columns: minmax(150px, 0.9fr) minmax(0, 1fr) 54px 18px 54px minmax(0, 1fr);
   gap: 10px;
   align-items: center;
   padding: 14px;
@@ -280,7 +280,19 @@ input:focus {
   font-size: 0.95rem;
 }
 
-.match-row span:first-child {
+.match-meta {
+  display: grid;
+  gap: 2px;
+  color: var(--deloitte-gray-700);
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+
+.match-meta small {
+  color: var(--deloitte-gray-500);
+}
+
+.match-row > span:nth-of-type(1) {
   text-align: right;
 }
 
@@ -304,7 +316,7 @@ input:focus {
 
 .team-setting {
   display: grid;
-  grid-template-columns: 44px 1fr 74px 74px;
+  grid-template-columns: 44px 1fr;
   gap: 8px;
   align-items: center;
   padding: 10px;
@@ -317,14 +329,6 @@ input:focus {
   font-weight: 900;
 }
 
-.team-setting::after {
-  content: 'Fair play / rank';
-  grid-column: 3 / 5;
-  grid-row: 2;
-  color: var(--deloitte-gray-500);
-  font-size: 0.68rem;
-  text-transform: uppercase;
-}
 
 table {
   width: 100%;
@@ -524,11 +528,11 @@ td:last-child {
     font-size: 0.82rem;
   }
 
-  .team-setting {
-    grid-template-columns: 38px 1fr;
+  .match-meta {
+    grid-column: 1 / -1;
   }
 
-  .team-setting::after {
-    grid-column: 1 / -1;
+  .team-setting {
+    grid-template-columns: 38px 1fr;
   }
 }

@@ -33,26 +33,118 @@ const teams = groupIds.flatMap((group) =>
 
 const teamById = new Map(teams.map((team) => [team.id, team]))
 
-const groupMatches = groupIds.flatMap((group) => {
-  const groupTeams = teams.filter((team) => team.group === group)
-  const pairings = [
-    [0, 1],
-    [2, 3],
-    [0, 2],
-    [1, 3],
-    [0, 3],
-    [1, 2],
-  ]
+const matchScheduleByGroup = {
+  A: [
+    ['A1', 'A2', '11. juni 2026', '15:00 ET', 'Estadio Azteca, Mexico City'],
+    ['A3', 'A4', '11. juni 2026', '22:00 ET', 'Estadio Akron, Guadalajara'],
+    ['A2', 'A4', '18. juni 2026', '12:00 ET', 'Mercedes-Benz Stadium, Atlanta'],
+    ['A1', 'A3', '18. juni 2026', '21:00 ET', 'Estadio Akron, Guadalajara'],
+    ['A1', 'A4', '24. juni 2026', '21:00 ET', 'Estadio Azteca, Mexico City'],
+    ['A3', 'A2', '24. juni 2026', '21:00 ET', 'Estadio BBVA, Monterrey'],
+  ],
+  B: [
+    ['B1', 'B2', '12. juni 2026', '15:00 ET', 'BMO Field, Toronto'],
+    ['B3', 'B4', '13. juni 2026', '15:00 ET', "Levi's Stadium, Santa Clara"],
+    ['B4', 'B2', '18. juni 2026', '15:00 ET', 'SoFi Stadium, Inglewood'],
+    ['B1', 'B3', '18. juni 2026', '18:00 ET', 'BC Place, Vancouver'],
+    ['B1', 'B4', '24. juni 2026', '15:00 ET', 'BC Place, Vancouver'],
+    ['B3', 'B2', '24. juni 2026', '15:00 ET', 'Lumen Field, Seattle'],
+  ],
+  C: [
+    ['C1', 'C2', '13. juni 2026', '18:00 ET', 'MetLife Stadium, East Rutherford'],
+    ['C3', 'C4', '13. juni 2026', '21:00 ET', 'Gillette Stadium, Foxborough'],
+    ['C4', 'C2', '19. juni 2026', '15:00 ET', 'Gillette Stadium, Foxborough'],
+    ['C1', 'C3', '19. juni 2026', '21:00 ET', 'Lincoln Financial Field, Philadelphia'],
+    ['C4', 'C1', '24. juni 2026', '18:00 ET', 'Hard Rock Stadium, Miami Gardens'],
+    ['C2', 'C3', '24. juni 2026', '18:00 ET', 'Mercedes-Benz Stadium, Atlanta'],
+  ],
+  D: [
+    ['D1', 'D2', '12. juni 2026', '21:00 ET', 'SoFi Stadium, Inglewood'],
+    ['D3', 'D4', '13. juni 2026', '00:00 ET', 'BC Place, Vancouver'],
+    ['D2', 'D4', '19. juni 2026', '00:00 ET', "Levi's Stadium, Santa Clara"],
+    ['D1', 'D3', '19. juni 2026', '15:00 ET', 'Lumen Field, Seattle'],
+    ['D1', 'D4', '25. juni 2026', '22:00 ET', 'SoFi Stadium, Inglewood'],
+    ['D2', 'D3', '25. juni 2026', '22:00 ET', "Levi's Stadium, Santa Clara"],
+  ],
+  E: [
+    ['E1', 'E2', '14. juni 2026', '13:00 ET', 'NRG Stadium, Houston'],
+    ['E3', 'E4', '14. juni 2026', '19:00 ET', 'Lincoln Financial Field, Philadelphia'],
+    ['E1', 'E3', '20. juni 2026', '16:00 ET', 'BMO Field, Toronto'],
+    ['E4', 'E2', '20. juni 2026', '20:00 ET', 'GEHA Field at Arrowhead, Kansas City'],
+    ['E4', 'E1', '25. juni 2026', '16:00 ET', 'MetLife Stadium, East Rutherford'],
+    ['E2', 'E3', '25. juni 2026', '16:00 ET', 'Lincoln Financial Field, Philadelphia'],
+  ],
+  F: [
+    ['F1', 'F2', '14. juni 2026', '16:00 ET', 'AT&T Stadium, Arlington'],
+    ['F4', 'F3', '14. juni 2026', '22:00 ET', 'Estadio BBVA, Monterrey'],
+    ['F4', 'F2', '20. juni 2026', '00:00 ET', 'Estadio BBVA, Monterrey'],
+    ['F1', 'F3', '20. juni 2026', '13:00 ET', 'NRG Stadium, Houston'],
+    ['F4', 'F1', '25. juni 2026', '19:00 ET', 'GEHA Field at Arrowhead, Kansas City'],
+    ['F2', 'F3', '25. juni 2026', '19:00 ET', 'AT&T Stadium, Arlington'],
+  ],
+  G: [
+    ['G1', 'G2', '15. juni 2026', '15:00 ET', 'Lumen Field, Seattle'],
+    ['G3', 'G4', '15. juni 2026', '21:00 ET', 'SoFi Stadium, Inglewood'],
+    ['G1', 'G3', '21. juni 2026', '15:00 ET', 'SoFi Stadium, Inglewood'],
+    ['G4', 'G2', '21. juni 2026', '21:00 ET', 'BC Place, Vancouver'],
+    ['G4', 'G1', '26. juni 2026', '23:00 ET', 'BC Place, Vancouver'],
+    ['G2', 'G3', '26. juni 2026', '23:00 ET', 'Lumen Field, Seattle'],
+  ],
+  H: [
+    ['H1', 'H2', '15. juni 2026', '12:00 ET', 'Mercedes-Benz Stadium, Atlanta'],
+    ['H3', 'H4', '15. juni 2026', '18:00 ET', 'Hard Rock Stadium, Miami Gardens'],
+    ['H1', 'H3', '21. juni 2026', '12:00 ET', 'Mercedes-Benz Stadium, Atlanta'],
+    ['H4', 'H2', '21. juni 2026', '18:00 ET', 'Hard Rock Stadium, Miami Gardens'],
+    ['H4', 'H1', '26. juni 2026', '20:00 ET', 'Estadio Akron, Guadalajara'],
+    ['H2', 'H3', '26. juni 2026', '20:00 ET', 'NRG Stadium, Houston'],
+  ],
+  I: [
+    ['I1', 'I2', '16. juni 2026', '15:00 ET', 'MetLife Stadium, East Rutherford'],
+    ['I4', 'I3', '16. juni 2026', '18:00 ET', 'Gillette Stadium, Foxborough'],
+    ['I1', 'I3', '22. juni 2026', '17:00 ET', 'Lincoln Financial Field, Philadelphia'],
+    ['I4', 'I2', '22. juni 2026', '20:00 ET', 'MetLife Stadium, East Rutherford'],
+    ['I4', 'I1', '26. juni 2026', '15:00 ET', 'Gillette Stadium, Foxborough'],
+    ['I2', 'I3', '26. juni 2026', '15:00 ET', 'BMO Field, Toronto'],
+  ],
+  J: [
+    ['J3', 'J4', '16. juni 2026', '00:00 ET', "Levi's Stadium, Santa Clara"],
+    ['J1', 'J2', '16. juni 2026', '21:00 ET', 'GEHA Field at Arrowhead, Kansas City'],
+    ['J1', 'J3', '22. juni 2026', '13:00 ET', 'AT&T Stadium, Arlington'],
+    ['J4', 'J2', '22. juni 2026', '23:00 ET', "Levi's Stadium, Santa Clara"],
+    ['J4', 'J1', '27. juni 2026', '22:00 ET', 'AT&T Stadium, Arlington'],
+    ['J2', 'J3', '27. juni 2026', '22:00 ET', 'GEHA Field at Arrowhead, Kansas City'],
+  ],
+  K: [
+    ['K1', 'K2', '17. juni 2026', '13:00 ET', 'NRG Stadium, Houston'],
+    ['K3', 'K4', '17. juni 2026', '22:00 ET', 'Estadio Azteca, Mexico City'],
+    ['K1', 'K3', '23. juni 2026', '13:00 ET', 'NRG Stadium, Houston'],
+    ['K4', 'K2', '23. juni 2026', '22:00 ET', 'Estadio Akron, Guadalajara'],
+    ['K4', 'K1', '27. juni 2026', '19:30 ET', 'Hard Rock Stadium, Miami Gardens'],
+    ['K3', 'K2', '27. juni 2026', '19:30 ET', 'Mercedes-Benz Stadium, Atlanta'],
+  ],
+  L: [
+    ['L1', 'L2', '17. juni 2026', '16:00 ET', 'AT&T Stadium, Arlington'],
+    ['L3', 'L4', '17. juni 2026', '19:00 ET', 'BMO Field, Toronto'],
+    ['L1', 'L3', '23. juni 2026', '16:00 ET', 'Gillette Stadium, Foxborough'],
+    ['L4', 'L2', '23. juni 2026', '19:00 ET', 'BMO Field, Toronto'],
+    ['L4', 'L1', '27. juni 2026', '17:00 ET', 'MetLife Stadium, East Rutherford'],
+    ['L2', 'L3', '27. juni 2026', '17:00 ET', 'Lincoln Financial Field, Philadelphia'],
+  ],
+}
 
-  return pairings.map(([homeIndex, awayIndex], matchIndex) => ({
+const groupMatches = groupIds.flatMap((group) =>
+  matchScheduleByGroup[group].map(([home, away, date, time, venue], matchIndex) => ({
     id: `${group}-${matchIndex + 1}`,
     group,
-    home: groupTeams[homeIndex].id,
-    away: groupTeams[awayIndex].id,
-  }))
-})
+    home,
+    away,
+    date,
+    time,
+    venue,
+  })),
+)
 
-const emptyRow = (team, meta) => ({
+const emptyRow = (team) => ({
   team,
   played: 0,
   won: 0,
@@ -63,8 +155,6 @@ const emptyRow = (team, meta) => ({
   goalDifference: 0,
   points: 0,
   headToHeadNote: '',
-  conductScore: Number(meta?.conductScore === '' ? 0 : (meta?.conductScore ?? 0)),
-  fifaRank: Number(meta?.fifaRank === '' ? 999 : (meta?.fifaRank ?? 999)),
 })
 
 const parseScore = (value) => {
@@ -87,22 +177,17 @@ function compareRows(a, b) {
     b.points - a.points ||
     b.goalDifference - a.goalDifference ||
     b.goalsFor - a.goalsFor ||
-    b.conductScore - a.conductScore ||
-    a.fifaRank - b.fifaRank ||
     a.team.name.localeCompare(b.team.name, 'nb')
   )
 }
 
-function calculateTables(predictions, teamNames = {}, teamMeta = {}) {
+function calculateTables(predictions, teamNames = {}) {
   return Object.fromEntries(
     groupIds.map((group) => {
       const rows = new Map(
         teams
           .filter((team) => team.group === group)
-          .map((team) => [
-            team.id,
-            emptyRow({ ...team, name: teamNames[team.id] || team.name }, teamMeta[team.id]),
-          ]),
+          .map((team) => [team.id, emptyRow({ ...team, name: teamNames[team.id] || team.name })]),
       )
       const matches = groupMatches.filter((match) => match.group === group)
 
@@ -136,7 +221,7 @@ function getGroupProgress(group, predictions) {
 function explainTieBreaker(row, table) {
   const tiedOnPoints = table.filter((candidate) => candidate.points === row.points)
   if (tiedOnPoints.length === 1) return 'Ikke poenglikhet'
-  return row.headToHeadNote || 'Sortert på total målforskjell, scorede mål, fair play og FIFA-ranking'
+  return row.headToHeadNote || 'Sortert på total målforskjell og scorede mål'
 }
 
 function applyResult(homeRow, awayRow, homeGoals, awayGoals) {
@@ -167,22 +252,33 @@ function applyResult(homeRow, awayRow, homeGoals, awayGoals) {
 }
 
 function sortGroupRows(rows, matches, predictions) {
-  const byPoints = rows.reduce((groups, row) => {
-    const pointRows = groups.get(row.points) ?? []
-    pointRows.push(row)
-    groups.set(row.points, pointRows)
-    return groups
-  }, new Map())
-  return [...byPoints.keys()]
-    .sort((a, b) => b - a)
-    .flatMap((points) => sortPointTie(byPoints.get(points), matches, predictions))
+  const sorted = rows.sort(compareRows)
+  const result = []
+
+  for (let index = 0; index < sorted.length;) {
+    const tiedRows = [sorted[index]]
+    index += 1
+
+    while (index < sorted.length && hasSamePrimaryTie(sorted[index], tiedRows[0])) {
+      tiedRows.push(sorted[index])
+      index += 1
+    }
+
+    result.push(...sortPointTie(tiedRows, matches, predictions))
+  }
+
+  return result
+}
+
+function hasSamePrimaryTie(a, b) {
+  return a.points === b.points && a.goalDifference === b.goalDifference && a.goalsFor === b.goalsFor
 }
 
 function sortPointTie(rows, matches, predictions) {
   if (rows.length <= 1) return rows
 
   const concernedIds = new Set(rows.map((row) => row.team.id))
-  const headToHead = new Map(rows.map((row) => [row.team.id, emptyRow(row.team, row)]))
+  const headToHead = new Map(rows.map((row) => [row.team.id, emptyRow(row.team)]))
 
   matches.forEach((match) => {
     if (!concernedIds.has(match.home) || !concernedIds.has(match.away)) return
@@ -205,9 +301,9 @@ function sortPointTie(rows, matches, predictions) {
       return h2hResult
     }
 
-    a.headToHeadNote = 'Innbyrdes likt – bruker totalstatistikk'
-    b.headToHeadNote = 'Innbyrdes likt – bruker totalstatistikk'
-    return compareRows(a, b)
+    a.headToHeadNote = 'Innbyrdes likt – fair play er ignorert'
+    b.headToHeadNote = 'Innbyrdes likt – fair play er ignorert'
+    return a.team.name.localeCompare(b.team.name, 'nb')
   })
 }
 
