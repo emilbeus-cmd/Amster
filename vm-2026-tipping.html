@@ -975,24 +975,45 @@ function buildQualifiers(tables) {
 
 function buildRoundOf32(qualifiers) {
   const bySeed = new Map(qualifiers.map((qualifier) => [qualifier.seed, qualifier]))
-  const winners = groupIds.map((group) => bySeed.get(`${group}1`) ?? placeholder(`Vinner gruppe ${group}`))
-  const runnersUp = groupIds.map((group) => bySeed.get(`${group}2`) ?? placeholder(`Toer gruppe ${group}`))
-  const thirds = Array.from({ length: 8 }, (_, index) => bySeed.get(`B3-${index + 1}`) ?? placeholder(`${index + 1}. beste gruppetreer`))
+  const rankedThirds = Array.from({ length: 8 }, (_, index) => bySeed.get(`B3-${index + 1}`)).filter(Boolean)
+  const usedThirdTeamIds = new Set()
 
-  const topWinnerMatches = winners.slice(0, 8).map((winner, index) => [winner, thirds[index]])
-  const remainingMatches = [
-    [winners[8], runnersUp[0]],
-    [winners[9], runnersUp[1]],
-    [winners[10], runnersUp[2]],
-    [winners[11], runnersUp[3]],
-    [runnersUp[4], runnersUp[5]],
-    [runnersUp[6], runnersUp[7]],
-    [runnersUp[8], runnersUp[9]],
-    [runnersUp[10], runnersUp[11]],
+  const getSeed = (seed, source) => bySeed.get(seed) ?? placeholder(source)
+  const getThird = (allowedGroups, source) => {
+    const third = rankedThirds.find((qualifier) => {
+      const group = qualifier.team?.group ?? qualifier.stats?.team?.group
+      return group && allowedGroups.includes(group) && !usedThirdTeamIds.has(qualifier.team?.id)
+    })
+
+    if (!third?.team) return placeholder(source)
+    usedThirdTeamIds.add(third.team.id)
+    return {
+      ...third,
+      source: `${third.source} · slot ${source}`,
+    }
+  }
+
+  const roundOf32Slots = [
+    ['M73', getSeed('A2', 'Toer gruppe A'), getSeed('B2', 'Toer gruppe B')],
+    ['M74', getSeed('E1', 'Vinner gruppe E'), getThird('ABCDF', '3ABCDF')],
+    ['M75', getSeed('F1', 'Vinner gruppe F'), getSeed('C2', 'Toer gruppe C')],
+    ['M76', getSeed('C1', 'Vinner gruppe C'), getSeed('F2', 'Toer gruppe F')],
+    ['M77', getSeed('I1', 'Vinner gruppe I'), getThird('CDFGH', '3CDFGH')],
+    ['M78', getSeed('E2', 'Toer gruppe E'), getSeed('I2', 'Toer gruppe I')],
+    ['M79', getSeed('A1', 'Vinner gruppe A'), getThird('CEFHI', '3CEFHI')],
+    ['M80', getSeed('L1', 'Vinner gruppe L'), getThird('EHIJK', '3EHIJK')],
+    ['M81', getSeed('D1', 'Vinner gruppe D'), getThird('BEFIJ', '3BEFIJ')],
+    ['M82', getSeed('G1', 'Vinner gruppe G'), getThird('AEHIJ', '3AEHIJ')],
+    ['M83', getSeed('K2', 'Toer gruppe K'), getSeed('L2', 'Toer gruppe L')],
+    ['M84', getSeed('H1', 'Vinner gruppe H'), getSeed('J2', 'Toer gruppe J')],
+    ['M85', getSeed('B1', 'Vinner gruppe B'), getThird('EFGIJ', '3EFGIJ')],
+    ['M86', getSeed('J1', 'Vinner gruppe J'), getSeed('H2', 'Toer gruppe H')],
+    ['M87', getSeed('K1', 'Vinner gruppe K'), getThird('DEIJL', '3DEIJL')],
+    ['M88', getSeed('D2', 'Toer gruppe D'), getSeed('G2', 'Toer gruppe G')],
   ]
 
-  return [...topWinnerMatches, ...remainingMatches].map(([home, away], index) => ({
-    id: `R32-${index + 1}`,
+  return roundOf32Slots.map(([id, home, away]) => ({
+    id,
     round: 'round32',
     home,
     away,
@@ -1001,28 +1022,42 @@ function buildRoundOf32(qualifiers) {
 
 function buildKnockoutBracket(roundOf32, winners) {
   const matches = [...roundOf32]
-  const addRound = (round, prefix, previousIds) => {
-    const nextIds = []
-    for (let index = 0; index < previousIds.length; index += 2) {
-      const first = previousIds[index]
-      const second = previousIds[index + 1]
-      const id = `${prefix}-${index / 2 + 1}`
-      matches.push({
-        id,
-        round,
-        home: winnerAsQualifier(matches.find((match) => match.id === first), winners[first]),
-        away: winnerAsQualifier(matches.find((match) => match.id === second), winners[second]),
-        dependsOn: [first, second],
-      })
-      nextIds.push(id)
-    }
-    return nextIds
+
+  const addMatch = (id, round, first, second) => {
+    matches.push({
+      id,
+      round,
+      home: winnerAsQualifier(matches.find((match) => match.id === first), winners[first]),
+      away: winnerAsQualifier(matches.find((match) => match.id === second), winners[second]),
+      dependsOn: [first, second],
+    })
   }
 
-  const round16 = addRound('round16', 'R16', roundOf32.map((match) => match.id))
-  const quarters = addRound('quarter', 'QF', round16)
-  const semis = addRound('semi', 'SF', quarters)
-  addRound('final', 'F', semis)
+  const round16Slots = [
+    ['M89', 'M74', 'M77'],
+    ['M90', 'M73', 'M75'],
+    ['M91', 'M76', 'M78'],
+    ['M92', 'M79', 'M80'],
+    ['M93', 'M83', 'M84'],
+    ['M94', 'M81', 'M82'],
+    ['M95', 'M86', 'M88'],
+    ['M96', 'M85', 'M87'],
+  ]
+  const quarterSlots = [
+    ['M97', 'M89', 'M90'],
+    ['M98', 'M93', 'M94'],
+    ['M99', 'M91', 'M92'],
+    ['M100', 'M95', 'M96'],
+  ]
+  const semiSlots = [
+    ['M101', 'M97', 'M98'],
+    ['M102', 'M99', 'M100'],
+  ]
+
+  round16Slots.forEach(([id, first, second]) => addMatch(id, 'round16', first, second))
+  quarterSlots.forEach(([id, first, second]) => addMatch(id, 'quarter', first, second))
+  semiSlots.forEach(([id, first, second]) => addMatch(id, 'semi', first, second))
+  addMatch('M104', 'final', 'M101', 'M102')
 
   return matches
 }
@@ -1085,42 +1120,10 @@ const bonusQuestions = [
   { id: 'penaltyShootoutMatches', label: 'Antall sluttspillkamper som avgjøres på straffer (bruk tall, 0 er gyldig svar)', inputMode: 'numeric' },
   { id: 'mostPenaltiesTeam', label: 'Hvilket lag får flest straffer (ikke inkludert straffesparkkonkurranse)?', suggestions: 'teams' },
   { id: 'starGoals', label: 'Hvor mange mål skårer Mbappe, Kane og Haaland til sammen?', inputMode: 'numeric' },
-  { id: 'youngPlayer', label: 'Vinner av FIFAs young player of the tournament', suggestions: 'youngPlayers' },
-  { id: 'bestPlayer', label: 'Vinner av FIFAs best player of the tournament', suggestions: 'players' },
+  { id: 'youngPlayer', label: 'Vinner av FIFAs young player of the tournament' },
+  { id: 'bestPlayer', label: 'Vinner av FIFAs best player of the tournament' },
 ]
 
-const playerSuggestions = [
-  'Kylian Mbappe',
-  'Harry Kane',
-  'Erling Haaland',
-  'Lionel Messi',
-  'Jude Bellingham',
-  'Vinicius Junior',
-  'Lamine Yamal',
-  'Florian Wirtz',
-  'Jamal Musiala',
-  'Phil Foden',
-  'Bukayo Saka',
-  'Pedri',
-  'Gavi',
-  'Rodri',
-  'Bruno Fernandes',
-  'Cristiano Ronaldo',
-  'Lautaro Martinez',
-]
-
-const youngPlayerSuggestions = [
-  'Lamine Yamal',
-  'Jude Bellingham',
-  'Florian Wirtz',
-  'Jamal Musiala',
-  'Endrick',
-  'Kobbie Mainoo',
-  'Arda Güler',
-  'Warren Zaïre-Emery',
-  'Gavi',
-  'Pedri',
-]
 
 const initialState = {
   activeGroup: 'A',
@@ -1279,8 +1282,6 @@ function getSuggestionOptions(question) {
   const suggestionGroups = {
     teams: teamOptions,
     teamsWithNone: ['Ingen', ...teamOptions],
-    players: playerSuggestions,
-    youngPlayers: youngPlayerSuggestions,
   }
 
   return [...new Set(suggestionGroups[question.suggestions] ?? [])].filter(Boolean)
@@ -1429,8 +1430,8 @@ function render() {
   const roundOf32 = buildRoundOf32(qualifiers)
   const bracket = buildKnockoutBracket(roundOf32, state.knockoutWinners)
   const completedGroupMatches = groupMatches.filter((match) => hasValidPrediction(state.predictions[match.id])).length
-  const champion = bracket.find((match) => match.id === 'F-1')
-  const championName = state.knockoutWinners['F-1'] ? displayName(state.knockoutWinners['F-1']) : 'Ikke kåret ennå'
+  const champion = bracket.find((match) => match.id === 'M104')
+  const championName = state.knockoutWinners.M104 ? displayName(state.knockoutWinners.M104) : 'Ikke kåret ennå'
   const activeProgress = getGroupProgress(state.activeGroup, state.predictions)
 
   app.innerHTML = `

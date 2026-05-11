@@ -24,42 +24,10 @@ const bonusQuestions = [
   { id: 'penaltyShootoutMatches', label: 'Antall sluttspillkamper som avgjøres på straffer (bruk tall, 0 er gyldig svar)', inputMode: 'numeric' },
   { id: 'mostPenaltiesTeam', label: 'Hvilket lag får flest straffer (ikke inkludert straffesparkkonkurranse)?', suggestions: 'teams' },
   { id: 'starGoals', label: 'Hvor mange mål skårer Mbappe, Kane og Haaland til sammen?', inputMode: 'numeric' },
-  { id: 'youngPlayer', label: 'Vinner av FIFAs young player of the tournament', suggestions: 'youngPlayers' },
-  { id: 'bestPlayer', label: 'Vinner av FIFAs best player of the tournament', suggestions: 'players' },
+  { id: 'youngPlayer', label: 'Vinner av FIFAs young player of the tournament' },
+  { id: 'bestPlayer', label: 'Vinner av FIFAs best player of the tournament' },
 ]
 
-const playerSuggestions = [
-  'Kylian Mbappe',
-  'Harry Kane',
-  'Erling Haaland',
-  'Lionel Messi',
-  'Jude Bellingham',
-  'Vinicius Junior',
-  'Lamine Yamal',
-  'Florian Wirtz',
-  'Jamal Musiala',
-  'Phil Foden',
-  'Bukayo Saka',
-  'Pedri',
-  'Gavi',
-  'Rodri',
-  'Bruno Fernandes',
-  'Cristiano Ronaldo',
-  'Lautaro Martinez',
-]
-
-const youngPlayerSuggestions = [
-  'Lamine Yamal',
-  'Jude Bellingham',
-  'Florian Wirtz',
-  'Jamal Musiala',
-  'Endrick',
-  'Kobbie Mainoo',
-  'Arda Güler',
-  'Warren Zaïre-Emery',
-  'Gavi',
-  'Pedri',
-]
 
 const initialState = {
   activeGroup: 'A',
@@ -218,8 +186,6 @@ function getSuggestionOptions(question) {
   const suggestionGroups = {
     teams: teamOptions,
     teamsWithNone: ['Ingen', ...teamOptions],
-    players: playerSuggestions,
-    youngPlayers: youngPlayerSuggestions,
   }
 
   return [...new Set(suggestionGroups[question.suggestions] ?? [])].filter(Boolean)
@@ -368,8 +334,8 @@ function render() {
   const roundOf32 = buildRoundOf32(qualifiers)
   const bracket = buildKnockoutBracket(roundOf32, state.knockoutWinners)
   const completedGroupMatches = groupMatches.filter((match) => hasValidPrediction(state.predictions[match.id])).length
-  const champion = bracket.find((match) => match.id === 'F-1')
-  const championName = state.knockoutWinners['F-1'] ? displayName(state.knockoutWinners['F-1']) : 'Ikke kåret ennå'
+  const champion = bracket.find((match) => match.id === 'M104')
+  const championName = state.knockoutWinners.M104 ? displayName(state.knockoutWinners.M104) : 'Ikke kåret ennå'
   const activeProgress = getGroupProgress(state.activeGroup, state.predictions)
 
   app.innerHTML = `
