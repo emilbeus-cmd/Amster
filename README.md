@@ -1,54 +1,84 @@
 # VM 2026 tippekonkurranse
 
-Dette er en helt statisk webapp. Du trenger ikke Node, npm, Python, terminal eller andre programmeringsverktøy for å prøve den lokalt.
+Dette er en statisk VM 2026-tippekalkulator som kan deles med venner. Den lagrer utkast lokalt i nettleseren mens brukeren fyller ut tipset, og kan sende ferdige tips til **Netlify Forms** når siden hostes på Netlify.
 
+## Anbefalt produksjonsoppsett: Netlify
 
-## Last ned prosjektmappen til PC
+Netlify er valgt fordi prosjektet er statisk og ikke trenger egen backend eller database for første versjon av konkurransen.
 
-### Fra GitHub i nettleseren
+1. Legg repoet på GitHub.
+2. Opprett en Netlify-konto.
+3. Velg **Add new site** → **Import an existing project**.
+4. Koble til GitHub-repoet.
+5. Bruk disse innstillingene:
+   - **Build command:** tomt felt
+   - **Publish directory:** `.`
+6. Deploy siden.
+7. Åpne Netlify-dashboardet → **Forms** og kontroller at skjemaet `vm-2026-tips` finnes etter første deploy.
 
-1. Åpne GitHub-siden for prosjektet i nettleseren.
-2. Trykk på den grønne `Code`-knappen.
-3. Velg `Download ZIP`.
-4. Finn ZIP-filen i `Nedlastinger`/`Downloads`.
-5. Høyreklikk ZIP-filen og velg `Pakk ut alle` på Windows, eller dobbeltklikk ZIP-filen på Mac.
-6. Åpne den utpakkede mappen og dobbeltklikk på `vm-2026-tipping.html`.
+Appen inneholder et skjult Netlify-skjema i `index.html` og `vm-2026-tipping.html`. Når en bruker trykker **Send inn tips**, sender JavaScript en URL-encoded POST til Netlify Forms. Innsendingen inneholder både regnearkvennlige enkeltfelt og en komplett `payloadJson` som backup.
 
-### Hvis noen sender deg prosjektet
+## Hente ut tips
 
-1. Be om hele prosjektmappen eller en ZIP-fil av prosjektmappen.
-2. Pakk ut ZIP-filen hvis du mottar en ZIP.
-3. Dobbeltklikk helst på `vm-2026-tipping.html`. Denne filen inneholder alt og er minst feilutsatt.
-4. Alternativt kan du dobbeltklikke på `index.html`, men da må `index.html` ligge ved siden av `src`-mappen.
+1. Gå til Netlify-dashboardet for siden.
+2. Åpne **Forms**.
+3. Velg skjemaet `vm-2026-tips`.
+4. Se innsendte tips direkte i Netlify eller eksporter dem som CSV.
+5. Importer CSV-en i Excel eller Google Sheets for poengberegning.
 
-## Test uten programmeringsverktøy
+Viktige felt i eksporten:
+
+- `firstName`, `lastName`, `email` og `submittedAt`
+- `match_A-1_home`, `match_A-1_away` osv. for gruppespilltips
+- `bonus_bestPlayer`, `bonus_youngPlayer` osv. for bonusspørsmål
+- `knockout_M73_winner`, `knockout_M104_winner` osv. for sluttspillvalg
+- `champion` og `championId`
+- `payloadJson` med komplett state fra appen
+
+## Lokal testing uten innsending
+
+Du kan fortsatt teste appen helt lokalt uten Netlify:
 
 1. Last ned eller kopier hele prosjektmappen til maskinen din.
 2. Åpne prosjektmappen i Finder/Utforsker.
 3. Dobbeltklikk på `vm-2026-tipping.html`.
-4. Nettleseren åpner appen lokalt fra filsystemet. Du kan også bruke `index.html` hvis `src`-mappen ligger ved siden av.
-5. Tipp resultatene gruppe for gruppe. Endringene lagres i nettleserens `localStorage` på din maskin.
+4. Nettleseren åpner appen lokalt fra filsystemet.
+5. Endringer lagres i nettleserens `localStorage` på din maskin.
 
-> Anbefalt: bruk `vm-2026-tipping.html` for lokal testing. Den er en selvstendig fil med HTML, CSS og JavaScript samlet. Hvis du bruker `index.html`, må du beholde `index.html` og `src`-mappen ved siden av hverandre.
+Merk: **Send inn tips** fungerer først når siden er deployet på Netlify, fordi den da poster til Netlify Forms. Ved lokal filåpning kan innsending feile, men lokal utfylling og lagring fungerer fortsatt.
 
+## Lokal server for utvikling
 
-## Hvis det ikke fungerer
-
-Prøv dette i rekkefølge:
-
-1. Slett den gamle nedlastingen og last ned ZIP-filen på nytt hvis du lastet ned før denne feilen ble rettet.
-2. Pakk ut ZIP-filen først. Ikke åpne filene direkte inni ZIP-visningen.
-3. Åpne `vm-2026-tipping.html` i den utpakkede mappen. Dette er den tryggeste måten fordi alt ligger i én fil.
-4. Hvis du heller åpner `index.html`, kontroller at `src`-mappen ligger i samme mappe som `index.html`.
-5. Bruk en moderne nettleser som Chrome, Edge, Firefox eller Safari.
-6. Hvis siden fortsatt er blank: høyreklikk på `vm-2026-tipping.html`, velg `Åpne med`, og velg nettleseren din.
-
-## Valgfri lokal server
-
-Hvis du likevel har terminal tilgjengelig, kan appen også kjøres med:
+Hvis du har terminal tilgjengelig, kan appen kjøres med:
 
 ```bash
 npm run dev
 ```
 
-Dette er bare et alternativ. Dobbeltklikk på `vm-2026-tipping.html` er nok for vanlig testing.
+Åpne deretter `http://localhost:5173` i nettleseren.
+
+## Syntax check
+
+```bash
+npm run check
+```
+
+Dette kjører `node --check src/tournament.js && node --check src/main.js`.
+
+## Oppdatere single-file-versjonen
+
+`vm-2026-tipping.html` er den delbare alt-i-ett-filen. Når du endrer `index.html`, `src/styles.css`, `src/tournament.js` eller `src/main.js`, regenerer den med:
+
+```bash
+npm run build
+```
+
+## Hvis siden ikke fungerer lokalt
+
+Prøv dette i rekkefølge:
+
+1. Slett den gamle nedlastingen og last ned ZIP-filen på nytt hvis du lastet ned en eldre versjon.
+2. Pakk ut ZIP-filen først. Ikke åpne filene direkte inni ZIP-visningen.
+3. Åpne `vm-2026-tipping.html` i den utpakkede mappen.
+4. Hvis du heller åpner `index.html`, kontroller at `index.html` ligger ved siden av `src`-mappen.
+5. Bruk en moderne nettleser som Chrome, Edge, Firefox eller Safari.

@@ -15,6 +15,7 @@ const {
 } = window.Tournament
 
 const STORAGE_KEY = 'vm-2026-tipping-state'
+const NETLIFY_FORM_NAME = 'vm-2026-tips'
 
 const bonusQuestions = [
   { id: 'mostGoalsTeam', label: 'Lag med flest mål totalt (hele turneringen)', suggestions: 'teams' },
@@ -36,6 +37,7 @@ const initialState = {
   customTeamNames: Object.fromEntries(teams.map((team) => [team.id, team.name])),
   bonusAnswers: Object.fromEntries(bonusQuestions.map((question) => [question.id, ''])),
   participant: { firstName: '', lastName: '', email: '' },
+  submission: { status: 'idle', submittedAt: '', error: '', dirtySinceSubmit: false },
 }
 
 let state = loadState()
@@ -78,6 +80,7 @@ function normalizeState(nextState) {
     customTeamNames: { ...initialState.customTeamNames, ...nextState.customTeamNames },
     bonusAnswers: { ...initialState.bonusAnswers, ...nextState.bonusAnswers },
     participant: { ...initialState.participant, ...nextState.participant },
+    submission: { ...initialState.submission, ...nextState.submission },
   }
 }
 
@@ -104,6 +107,7 @@ function buildRestoreSelector(dataset) {
   if (dataset.prediction && dataset.side) return `[data-prediction="${dataset.prediction}"][data-side="${dataset.side}"]`
   if (dataset.bonus) return `[data-bonus="${dataset.bonus}"]`
   if (dataset.participant) return `[data-participant="${dataset.participant}"]`
+  if (dataset.action === 'submit-tips') return '[data-action="submit-tips"]'
   return null
 }
 
@@ -124,13 +128,26 @@ function displayName(teamId) {
   return state.customTeamNames[teamId] || teamById.get(teamId)?.name || 'Ukjent lag'
 }
 
+function markChangedAfterSubmit(nextState) {
+  if (state.submission.status !== 'success') return nextState
+
+  return {
+    ...nextState,
+    submission: {
+      ...nextState.submission,
+      dirtySinceSubmit: true,
+      error: '',
+    },
+  }
+}
+
 function setActiveGroup(group) {
   persist({ ...state, activeGroup: group })
 }
 
 function updatePrediction(matchId, side, value) {
   if (!/^\d{0,2}$/.test(value)) return
-  persist({
+  persist(markChangedAfterSubmit({
     ...state,
     predictions: {
       ...state.predictions,
@@ -141,29 +158,29 @@ function updatePrediction(matchId, side, value) {
       },
     },
     knockoutWinners: {},
-  }, { preserveViewport: true })
+  }), { preserveViewport: true })
 }
 
 
 function updateParticipant(field, value) {
-  persist({
+  persist(markChangedAfterSubmit({
     ...state,
     participant: {
       ...state.participant,
       [field]: value,
     },
-  }, { preserveViewport: true })
+  }), { preserveViewport: true })
 }
 
 
 function updateBonusAnswer(questionId, value) {
-  persist({
+  persist(markChangedAfterSubmit({
     ...state,
     bonusAnswers: {
       ...state.bonusAnswers,
       [questionId]: value,
     },
-  }, { preserveViewport: true })
+  }), { preserveViewport: true })
 }
 
 function calculatePredictedGroupGoals() {
@@ -269,6 +286,16 @@ function renderBonusInput(question) {
     `
   }
 
+  if (!question.suggestions) {
+    return `
+      <input
+        data-bonus="${question.id}"
+        value="${escapeAttribute(value)}"
+        aria-label="${escapeAttribute(question.label)}"
+      />
+    `
+  }
+
   const suggestions = getMatchingSuggestions(question, value)
   const validation = getBonusValidation(question, value)
   return `
@@ -302,6 +329,171 @@ function renderAutocompleteSuggestions(question, suggestions) {
 }
 
 
+
+function validateSubmission() {
+  const missing = []
+  if (!state.participant.firstName.trim()) missing.push('fornavn')
+  if (!state.participant.lastName.trim()) missing.push('etternavn')
+  if (!state.participant.email.trim()) missing.push('e-post')
+  if (state.participant.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.participant.email.trim())) missing.push('gyldig e-post')
+
+  return missing.length ? `Fyll ut ${missing.join(', ')} før du sender inn tipset.` : ''
+}
+
+function buildSubmissionPayload(bracket = null) {
+  const submittedAt = new Date().toISOString()
+  const matches = bracket ?? buildCurrentBracket()
+  const championId = state.knockoutWinners.M104 ?? ''
+  const championName = championId ? displayName(championId) : ''
+  const payload = {
+    formName: NETLIFY_FORM_NAME,
+    firstName: state.participant.firstName.trim(),
+    lastName: state.participant.lastName.trim(),
+    email: state.participant.email.trim(),
+    submittedAt,
+    totalGroupGoals: String(calculatePredictedGroupGoals()),
+    championId,
+    champion: championName,
+  }
+
+  groupMatches.forEach((match) => {
+    const prediction = state.predictions[match.id] ?? {}
+    payload[`match_${match.id}_home`] = prediction.home ?? ''
+    payload[`match_${match.id}_away`] = prediction.away ?? ''
+    payload[`match_${match.id}_label`] = `${displayName(match.home)} - ${displayName(match.away)}`
+  })
+
+  bonusQuestions.forEach((question) => {
+    payload[`bonus_${question.id}`] = state.bonusAnswers[question.id] ?? ''
+  })
+
+  matches.forEach((match) => {
+    const winnerId = state.knockoutWinners[match.id] ?? ''
+    payload[`knockout_${match.id}_winnerId`] = winnerId
+    payload[`knockout_${match.id}_winner`] = winnerId ? displayName(winnerId) : ''
+  })
+
+  payload.payloadJson = JSON.stringify({
+    participant: payload.firstName || payload.lastName || payload.email ? { ...state.participant } : {},
+    predictions: state.predictions,
+    bonusAnswers: state.bonusAnswers,
+    knockoutWinners: state.knockoutWinners,
+    customTeamNames: state.customTeamNames,
+    summary: {
+      submittedAt,
+      totalGroupGoals: payload.totalGroupGoals,
+      championId,
+      champion: championName,
+    },
+  })
+
+  return payload
+}
+
+function encodeFormData(payload) {
+  const formData = new URLSearchParams()
+  formData.set('form-name', NETLIFY_FORM_NAME)
+  Object.entries(payload).forEach(([key, value]) => {
+    formData.set(key, value ?? '')
+  })
+  return formData.toString()
+}
+
+function buildCurrentBracket() {
+  const tables = calculateTables(state.predictions, state.customTeamNames)
+  const qualifiers = buildQualifiers(tables)
+  const roundOf32 = buildRoundOf32(qualifiers)
+  return buildKnockoutBracket(roundOf32, state.knockoutWinners)
+}
+
+async function submitTips(bracket) {
+  const validationError = validateSubmission()
+  if (validationError) {
+    persist({
+      ...state,
+      submission: { ...state.submission, status: 'error', error: validationError },
+    })
+    return
+  }
+
+  const payload = buildSubmissionPayload(bracket)
+  persist({
+    ...state,
+    submission: { ...state.submission, status: 'sending', error: '' },
+  }, { preserveViewport: true })
+
+  try {
+    const response = await fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: encodeFormData(payload),
+    })
+
+    if (!response.ok) throw new Error(`Netlify svarte med ${response.status}`)
+
+    persist({
+      ...state,
+      submission: { status: 'success', submittedAt: payload.submittedAt, error: '', dirtySinceSubmit: false },
+    })
+  } catch (error) {
+    persist({
+      ...state,
+      submission: {
+        ...state.submission,
+        status: 'error',
+        error: `Kunne ikke sende inn. Prøv igjen fra Netlify-siden. Teknisk feilmelding: ${error.message}`,
+      },
+    })
+  }
+}
+
+function renderSubmissionPanel(bracket) {
+  const validationError = validateSubmission()
+  const isSending = state.submission.status === 'sending'
+  const submittedAt = state.submission.submittedAt ? new Date(state.submission.submittedAt).toLocaleString('nb-NO') : ''
+  const championName = state.knockoutWinners.M104 ? displayName(state.knockoutWinners.M104) : 'Ikke valgt'
+  const statusClass = state.submission.status === 'success' && !state.submission.dirtySinceSubmit ? 'success' : state.submission.status === 'error' ? 'error' : 'info'
+  let statusText = 'Tipsene lagres automatisk i nettleseren din. Trykk på knappen når du er klar til å sende dem inn til konkurransen.'
+
+  if (state.submission.status === 'sending') statusText = 'Sender tipset ditt til Netlify …'
+  if (state.submission.status === 'success') statusText = `Tips sendt inn${submittedAt ? ` ${submittedAt}` : ''}.`
+  if (state.submission.dirtySinceSubmit) statusText = 'Du har endret tips etter siste innsending. Send inn på nytt for at endringene skal gjelde.'
+  if (state.submission.status === 'error') statusText = state.submission.error
+
+  return `
+    <section class="panel submit-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Siste steg</p>
+          <h2>Send inn tipset ditt</h2>
+        </div>
+        <p>Innsendingen lagres i Netlify Forms slik at arrangøren kan eksportere alle tips, navn og e-poster som CSV.</p>
+      </div>
+      <div class="submit-summary">
+        <div>
+          <span>Deltaker</span>
+          <strong>${escapeHtml([state.participant.firstName, state.participant.lastName].filter(Boolean).join(' ') || 'Mangler navn')}</strong>
+          <small>${escapeHtml(state.participant.email || 'Mangler e-post')}</small>
+        </div>
+        <div>
+          <span>Kamptips</span>
+          <strong>${groupMatches.filter((match) => hasValidPrediction(state.predictions[match.id])).length}/${groupMatches.length}</strong>
+          <small>utfylte gruppespillkamper</small>
+        </div>
+        <div>
+          <span>Mester</span>
+          <strong>${escapeHtml(championName)}</strong>
+          <small>fra sluttspillbracketen</small>
+        </div>
+      </div>
+      <div class="submission-status ${statusClass}" role="status">${escapeHtml(statusText)}</div>
+      ${validationError ? `<p class="submit-help">${escapeHtml(validationError)}</p>` : ''}
+      <button class="submit-button" data-action="submit-tips" ${isSending ? 'disabled' : ''}>${isSending ? 'Sender …' : 'Send inn tips'}</button>
+      <p class="submit-note">Tipsene kan fortsatt endres lokalt etter innsending, men da må du sende inn på nytt for at Netlify skal få den nye versjonen.</p>
+    </section>
+  `
+}
+
 function selectWinner(match, teamId, bracket) {
   const nextWinners = { ...state.knockoutWinners, [match.id]: teamId }
   const matchIndex = bracket.findIndex((candidate) => candidate.id === match.id)
@@ -313,7 +505,7 @@ function selectWinner(match, teamId, bracket) {
     }
   })
 
-  persist({ ...state, knockoutWinners: nextWinners })
+  persist(markChangedAfterSubmit({ ...state, knockoutWinners: nextWinners }))
 }
 
 function goToRelativeGroup(direction) {
@@ -434,10 +626,13 @@ function render() {
           ${['round32', 'round16', 'quarter', 'semi', 'final'].map((round) => renderRound(round, bracket)).join('')}
         </div>
       </section>
+
+      ${renderSubmissionPanel(bracket)}
     </main>
   `
 
   app.querySelector('[data-action="reset"]')?.addEventListener('click', resetAll)
+  app.querySelector('[data-action="submit-tips"]')?.addEventListener('click', () => submitTips(bracket))
   app.querySelectorAll('[data-group]').forEach((button) => {
     button.addEventListener('click', (event) => setActiveGroup(event.currentTarget.dataset.group))
   })

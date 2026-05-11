@@ -500,6 +500,85 @@ td:last-child {
   line-height: 1.6;
 }
 
+.submit-panel {
+  display: grid;
+  gap: 18px;
+  border-color: var(--deloitte-green);
+}
+
+.submit-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.submit-summary > div {
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+  background: var(--deloitte-gray-100);
+}
+
+.submit-summary span {
+  color: var(--deloitte-gray-700);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.submit-summary strong {
+  font-size: 1.15rem;
+  line-height: 1.15;
+}
+
+.submit-summary small,
+.submit-note {
+  color: var(--deloitte-gray-500);
+  line-height: 1.35;
+}
+
+.submission-status {
+  border-left: 5px solid var(--deloitte-black);
+  padding: 14px 16px;
+  color: var(--deloitte-black);
+  background: var(--deloitte-gray-100);
+  font-weight: 850;
+  line-height: 1.4;
+}
+
+.submission-status.success {
+  border-left-color: var(--deloitte-green);
+  background: var(--deloitte-green-soft);
+}
+
+.submission-status.error {
+  border-left-color: #d4351c;
+  background: #fff4f1;
+}
+
+.submit-help {
+  margin: 0;
+  color: #d4351c;
+  font-weight: 850;
+}
+
+.submit-button {
+  width: fit-content;
+  min-width: 180px;
+  border-color: var(--deloitte-green);
+  padding: 14px 22px;
+  background: var(--deloitte-green);
+  color: var(--deloitte-black);
+  font-weight: 900;
+}
+
+.submit-button:hover,
+.submit-button:focus {
+  border-color: var(--deloitte-black);
+  outline: 3px solid rgba(134, 188, 37, 0.24);
+}
+
 .bracket {
   display: grid;
   grid-template-columns: repeat(5, minmax(220px, 1fr));
@@ -593,7 +672,8 @@ td:last-child {
   }
 
   .group-tabs,
-  .participant-grid {
+  .participant-grid,
+  .submit-summary {
     grid-template-columns: 1fr;
   }
 
