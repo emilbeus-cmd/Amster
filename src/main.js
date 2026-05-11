@@ -16,11 +16,24 @@ const {
 
 const STORAGE_KEY = 'vm-2026-tipping-state'
 
+const bonusQuestions = [
+  { id: 'mostGoalsTeam', label: 'Lag med flest mål totalt (hele turneringen)' },
+  { id: 'mostConcededTeam', label: 'Lag som slipper inn flest mål totalt (hele turneringen)' },
+  { id: 'scorelessTeam', label: 'Navngi ett lag som går ut av VM uten å score mål ("ingen" er gyldig svar)' },
+  { id: 'roughestTeam', label: 'Råtass-laget (flest poeng for gule og røde kort)' },
+  { id: 'penaltyShootoutMatches', label: 'Antall sluttspillkamper som avgjøres på straffer (bruk tall, 0 er gyldig svar)', inputMode: 'numeric' },
+  { id: 'mostPenaltiesTeam', label: 'Hvilket lag får flest straffer (ikke inkludert straffesparkkonkurranse)?' },
+  { id: 'starGoals', label: 'Hvor mange mål skårer Mbappe, Kane og Haaland til sammen?', inputMode: 'numeric' },
+  { id: 'youngPlayer', label: 'Vinner av FIFAs young player of the tournament' },
+  { id: 'bestPlayer', label: 'Vinner av FIFAs best player of the tournament' },
+]
+
 const initialState = {
   activeGroup: 'A',
   predictions: {},
   knockoutWinners: {},
   customTeamNames: Object.fromEntries(teams.map((team) => [team.id, team.name])),
+  bonusAnswers: Object.fromEntries(bonusQuestions.map((question) => [question.id, ''])),
 }
 
 let state = loadState()
@@ -61,6 +74,7 @@ function normalizeState(nextState) {
     ...nextState,
     activeGroup: groupIds.includes(nextState.activeGroup) ? nextState.activeGroup : 'A',
     customTeamNames: { ...initialState.customTeamNames, ...nextState.customTeamNames },
+    bonusAnswers: { ...initialState.bonusAnswers, ...nextState.bonusAnswers },
   }
 }
 
@@ -85,7 +99,7 @@ function captureViewport() {
 
 function buildRestoreSelector(dataset) {
   if (dataset.prediction && dataset.side) return `[data-prediction="${dataset.prediction}"][data-side="${dataset.side}"]`
-  if (dataset.teamInput) return `[data-team-input="${dataset.teamInput}"]`
+  if (dataset.bonus) return `[data-bonus="${dataset.bonus}"]`
   return null
 }
 
@@ -126,16 +140,31 @@ function updatePrediction(matchId, side, value) {
   }, { preserveViewport: true })
 }
 
-function updateTeamName(teamId, value) {
+
+function updateBonusAnswer(questionId, value) {
   persist({
     ...state,
-    customTeamNames: {
-      ...state.customTeamNames,
-      [teamId]: value,
+    bonusAnswers: {
+      ...state.bonusAnswers,
+      [questionId]: value,
     },
-    knockoutWinners: {},
   }, { preserveViewport: true })
 }
+
+function calculatePredictedGroupGoals() {
+  return Object.values(state.predictions).reduce((total, prediction) => {
+    const homeGoals = parseBonusNumber(prediction.home)
+    const awayGoals = parseBonusNumber(prediction.away)
+    return total + homeGoals + awayGoals
+  }, 0)
+}
+
+function parseBonusNumber(value) {
+  if (value === undefined || value === null || value === '') return 0
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
 
 function selectWinner(match, teamId, bracket) {
   const nextWinners = { ...state.knockoutWinners, [match.id]: teamId }
@@ -222,6 +251,17 @@ function render() {
         </ol>
       </section>
 
+      <section class="panel bonus-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Bonusspørsmål</p>
+            <h2>Ekstra tips</h2>
+          </div>
+          <p>Disse svarene lagres sammen med resten av tipset ditt.</p>
+        </div>
+        ${renderBonusQuestions(calculatePredictedGroupGoals())}
+      </section>
+
       <section class="panel">
         <div class="section-heading">
           <div>
@@ -244,8 +284,8 @@ function render() {
   app.querySelectorAll('[data-group-step]').forEach((button) => {
     button.addEventListener('click', (event) => goToRelativeGroup(Number(event.currentTarget.dataset.groupStep)))
   })
-  app.querySelectorAll('[data-team-input]').forEach((input) => {
-    input.addEventListener('input', (event) => updateTeamName(event.target.dataset.teamInput, event.target.value))
+  app.querySelectorAll('[data-bonus]').forEach((input) => {
+    input.addEventListener('input', (event) => updateBonusAnswer(event.target.dataset.bonus, event.target.value))
   })
   app.querySelectorAll('[data-prediction]').forEach((input) => {
     input.addEventListener('input', (event) => updatePrediction(event.target.dataset.prediction, event.target.dataset.side, event.target.value))
@@ -275,8 +315,31 @@ function renderGroupTabs() {
   `
 }
 
+
+function renderBonusQuestions(totalGroupGoals) {
+  return `
+    <div class="bonus-grid">
+      <label class="bonus-result">
+        <span>1. Du har tippet følgende totalt antall mål i gruppespillet</span>
+        <strong>${totalGroupGoals}</strong>
+      </label>
+      ${bonusQuestions.map((question, index) => `
+        <label class="bonus-question">
+          <span>${index + 2}. ${escapeHtml(question.label)}</span>
+          <input
+            data-bonus="${question.id}"
+            inputmode="${question.inputMode ?? 'text'}"
+            value="${escapeAttribute(state.bonusAnswers[question.id] ?? '')}"
+            aria-label="${escapeAttribute(question.label)}"
+          />
+        </label>
+      `).join('')}
+    </div>
+  `
+}
+
+
 function renderActiveGroup(table) {
-  const groupTeams = teams.filter((team) => team.group === state.activeGroup)
   const currentIndex = groupIds.indexOf(state.activeGroup)
   return `
     <div class="active-group-layout">
@@ -306,30 +369,10 @@ function renderActiveGroup(table) {
         </div>
         ${renderTable(table)}
       </article>
-
-      <article class="team-settings-card">
-        <div class="card-heading">
-          <div>
-            <p class="eyebrow">Lag</p>
-            <h3>Juster lagnavn i gruppe ${state.activeGroup}</h3>
-          </div>
-        </div>
-        <div class="team-settings-grid">
-          ${groupTeams.map(renderTeamSetting).join('')}
-        </div>
-      </article>
     </div>
   `
 }
 
-function renderTeamSetting(team) {
-  return `
-    <label class="team-setting">
-      <span>${team.id}</span>
-      <input data-team-input="${team.id}" value="${escapeAttribute(state.customTeamNames[team.id])}" aria-label="Navn for ${team.id}" />
-    </label>
-  `
-}
 
 function renderTable(table) {
   return `

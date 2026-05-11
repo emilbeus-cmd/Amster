@@ -88,7 +88,6 @@ main {
 .panel,
 .predict-card,
 .table-card,
-.team-settings-card,
 .knockout-match {
   border: 1px solid var(--deloitte-gray-200);
   background: var(--white);
@@ -217,18 +216,13 @@ main {
 }
 
 .predict-card,
-.table-card,
-.team-settings-card {
+.table-card {
   padding: 20px;
 }
 
 .table-card {
   position: sticky;
   top: 16px;
-}
-
-.team-settings-card {
-  grid-column: 1 / -1;
 }
 
 .group-nav {
@@ -308,25 +302,36 @@ input:focus {
   font-weight: 900;
 }
 
-.team-settings-grid {
+.bonus-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
   gap: 10px;
 }
 
-.team-setting {
+.bonus-result,
+.bonus-question {
   display: grid;
-  grid-template-columns: 44px 1fr;
-  gap: 8px;
+  grid-template-columns: minmax(260px, 1fr) minmax(160px, 0.75fr);
+  gap: 12px;
   align-items: center;
-  padding: 10px;
+  padding: 12px;
+  border-left: 5px solid var(--deloitte-green);
   background: var(--deloitte-gray-100);
 }
 
-.team-setting span {
-  color: var(--deloitte-gray-500);
-  font-size: 0.85rem;
-  font-weight: 900;
+.bonus-result span,
+.bonus-question span {
+  font-weight: 800;
+}
+
+.bonus-result strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 10px 12px;
+  background: var(--deloitte-black);
+  color: var(--white);
+  font-size: 1.3rem;
 }
 
 
@@ -532,7 +537,8 @@ td:last-child {
     grid-column: 1 / -1;
   }
 
-  .team-setting {
-    grid-template-columns: 38px 1fr;
+  .bonus-result,
+  .bonus-question {
+    grid-template-columns: 1fr;
   }
 }
