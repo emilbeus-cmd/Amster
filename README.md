@@ -35,6 +35,19 @@ Viktige felt i eksporten:
 - `champion` og `championId`
 - `payloadJson` med komplett state fra appen
 
+
+## Feilsøking av Netlify-innsending
+
+Hvis brukeren får `Netlify svarte med 404` ved innsending, betyr det normalt at Netlify ikke behandlet POST-en som en kjent form submission. Sjekk dette i rekkefølge:
+
+1. Gå til Netlify-dashboardet → **Forms** og kontroller at `vm-2026-tips` ligger under aktive skjemaer.
+2. Kontroller at **Form detection** ikke er deaktivert i Netlify. Netlify behandler ikke nye eller endrede skjemaer hvis form detection er slått av.
+3. Kontroller at skjemaet ikke er slettet i Netlify. Hvis et skjema slettes, vil nye innsendinger til det skjemaet kunne gi 404.
+4. Deploy siste versjon fra GitHub på nytt etter endringer i `index.html` eller `vm-2026-tipping.html`.
+5. Test fra den publiserte Netlify-lenken, ikke fra lokal `file://`-åpning eller GitHub-visning.
+
+Appen poster nå til samme path som brukeren står på, slik at både `/` og direkte lenker til `/vm-2026-tipping.html` bruker en side hvor det skjulte Netlify-skjemaet faktisk finnes.
+
 ## Lokal testing uten innsending
 
 Du kan fortsatt teste appen helt lokalt uten Netlify:

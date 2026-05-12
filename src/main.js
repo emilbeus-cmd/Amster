@@ -399,6 +399,10 @@ function encodeFormData(payload) {
   return formData.toString()
 }
 
+function getSubmissionPath() {
+  return window.location.pathname || '/'
+}
+
 function buildCurrentBracket() {
   const tables = calculateTables(state.predictions, state.customTeamNames)
   const qualifiers = buildQualifiers(tables)
@@ -423,7 +427,7 @@ async function submitTips(bracket) {
   }, { preserveViewport: true })
 
   try {
-    const response = await fetch('/', {
+    const response = await fetch(getSubmissionPath(), {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: encodeFormData(payload),
@@ -441,7 +445,7 @@ async function submitTips(bracket) {
       submission: {
         ...state.submission,
         status: 'error',
-        error: `Kunne ikke sende inn. Prøv igjen fra Netlify-siden. Teknisk feilmelding: ${error.message}`,
+        error: `Kunne ikke sende inn. Prøv igjen fra Netlify-siden og kontroller at skjemaet ${NETLIFY_FORM_NAME} finnes under Forms i Netlify. Teknisk feilmelding: ${error.message}`,
       },
     })
   }
