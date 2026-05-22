@@ -47,7 +47,7 @@ main {
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(240px, 320px) 340px;
+  grid-template-columns: minmax(0, 1fr) 340px;
   gap: 24px;
   align-items: stretch;
   padding: 42px;
@@ -73,30 +73,6 @@ main {
   color: rgba(255, 255, 255, 0.76);
   font-size: 1.12rem;
   line-height: 1.7;
-}
-
-.hero-legends {
-  display: grid;
-  gap: 10px;
-  align-content: center;
-}
-
-.hero-legend {
-  margin: 0;
-  border: 1px solid rgba(255, 255, 255, 0.26);
-  background: rgba(0, 0, 0, 0.36);
-  overflow: hidden;
-}
-
-.hero-legend img {
-  display: block;
-  width: 100%;
-  aspect-ratio: 3 / 2;
-  object-fit: cover;
-}
-
-.hero-legend figcaption {
-  display: none;
 }
 
 .eyebrow {

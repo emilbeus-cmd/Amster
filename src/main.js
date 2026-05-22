@@ -29,16 +29,6 @@ const bonusQuestions = [
   { id: 'bestPlayer', label: 'Vinner av FIFAs best player of the tournament' },
 ]
 
-const heroPortraitSvg = {
-  dzeko: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0a0a0a"/><stop offset="100%" stop-color="#1f3a12"/></linearGradient></defs><rect width="800" height="520" fill="url(#bg)"/><circle cx="400" cy="185" r="92" fill="#d7b08a"/><path d="M300 170c15-70 185-70 200 0-20-22-43-30-100-30s-80 8-100 30z" fill="#1f1f1f"/><path d="M334 265h132l22 95H312z" fill="#202020"/><path d="M240 430c18-78 83-120 160-120s142 42 160 120" fill="#111"/></svg>`,
-  modric: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520"><defs><linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0a0a0a"/><stop offset="100%" stop-color="#122f1a"/></linearGradient></defs><rect width="800" height="520" fill="url(#bg2)"/><circle cx="400" cy="185" r="92" fill="#e3bd97"/><path d="M304 178c9-75 183-78 192-2-24-30-58-40-98-40s-73 10-94 42z" fill="#7a6a54"/><path d="M338 268h124l26 95H312z" fill="#f8f8f8"/><path d="M240 430c18-78 83-120 160-120s142 42 160 120" fill="#ededed"/></svg>`
-}
-
-function heroPortraitDataUri(key) {
-  return `data:image/svg+xml;utf8,${encodeURIComponent(heroPortraitSvg[key] || '')}`
-}
-
-
 const initialState = {
   activeGroup: 'A',
   predictions: {},
@@ -389,6 +379,11 @@ function buildSubmissionPayload(bracket = null) {
     groupPredictionsCompact: buildCompactGroupPredictions(),
     knockoutPicksCompact: buildCompactKnockoutPicks(matches),
     bonusAnswersCompact: buildCompactBonusAnswers(),
+    scoringRules: 'exactScore=3;correctOutcome=1',
+    aiInputVersion: 'vm2026.v1',
+    predictionsJson: JSON.stringify(state.predictions),
+    knockoutWinnersJson: JSON.stringify(state.knockoutWinners),
+    bonusAnswersJson: JSON.stringify(state.bonusAnswers),
     payloadJson: JSON.stringify({
       participant: { ...state.participant },
       predictions: state.predictions,
@@ -400,6 +395,8 @@ function buildSubmissionPayload(bracket = null) {
         totalGroupGoals: String(calculatePredictedGroupGoals()),
         championId,
         champion: championName,
+        scoringRules: { exactScore: 3, correctOutcome: 1 },
+        aiInputVersion: 'vm2026.v1',
       },
     }),
   }
@@ -555,14 +552,6 @@ function render() {
             Fyll inn konkrete resultater, for eksempel 3–1 til Frankrike over Norge. Appen rangerer lagene gruppe for gruppe,
             bruker innbyrdes oppgjør der det er poenglikhet, og sender gruppevinnere, gruppetoere og de åtte beste treerne videre.
           </p>
-        </div>
-        <div class="hero-legends" aria-label="Profilbilder av Edin Džeko og Luka Modrić">
-          <figure class="hero-legend">
-            <img src="${heroPortraitDataUri('dzeko')}" alt="Edin Džeko" loading="lazy" />
-          </figure>
-          <figure class="hero-legend">
-            <img src="${heroPortraitDataUri('modric')}" alt="Luka Modrić" loading="lazy" />
-          </figure>
         </div>
         <aside class="status-card">
           <span>${completedGroupMatches} / ${groupMatches.length}</span>

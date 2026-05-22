@@ -16,7 +16,7 @@ Netlify er valgt fordi prosjektet er statisk og ikke trenger egen backend eller 
 6. Deploy siden.
 7. Åpne Netlify-dashboardet → **Forms** og kontroller at skjemaet `vm-2026-tips` finnes etter første deploy.
 
-Appen inneholder et skjult Netlify-skjema i `index.html` og `vm-2026-tipping.html`. Når en bruker trykker **Send inn tips**, sender JavaScript en URL-encoded POST til Netlify Forms. Innsendingen inneholder både regnearkvennlige enkeltfelt og en komplett `payloadJson` som backup.
+Appen inneholder et skjult Netlify-skjema i `index.html` og `vm-2026-tipping.html`. Når en bruker trykker **Send inn tips**, sender JavaScript en URL-encoded POST til Netlify Forms. Innsendingen inneholder både kompakte eksportfelt og AI-vennlige JSON-felt, pluss en komplett `payloadJson` som backup.
 
 ## Hente ut tips
 
@@ -33,7 +33,28 @@ Viktige felt i eksporten:
 - `knockoutPicksCompact` med alle sluttspillvalg i ett kompakt felt
 - `bonusAnswersCompact` med alle bonusspørsmål i ett kompakt felt
 - `champion`, `championId` og `totalGroupGoals`
+- `scoringRules` (for eksempel `exactScore=3;correctOutcome=1`)
+- `aiInputVersion` for stabil parsing i AI-workflow
+- `predictionsJson`, `knockoutWinnersJson`, `bonusAnswersJson` som strukturerte felt en AI kan parse direkte
 - `payloadJson` med komplett state fra appen (backup for videre analyse)
+
+## AI-basert scoring dashboard (anbefalt flyt)
+
+For å gjøre scoring enkelt med AI etter eksport:
+
+1. Eksporter submissions CSV fra Netlify Forms.
+2. Hent faktiske kampresultater (manuelt eller via API) i et eget datasett.
+3. Parse `predictionsJson` per deltaker.
+4. Beregn poeng med reglene:
+   - 3 poeng ved eksakt resultat.
+   - 1 poeng ved riktig tippetegn (H/U/B), men feil eksakt resultat.
+5. Lag samlet score-tabell med:
+   - deltaker
+   - total poeng
+   - poeng per kamp
+   - bonuspoeng
+   - ranking
+6. Render dashboard i f.eks. Google Sheets, Notion, eller et enkelt web-dashboard.
 
 
 ## Feilsøking av Netlify-innsending
