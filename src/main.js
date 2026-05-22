@@ -29,6 +29,22 @@ const bonusQuestions = [
   { id: 'bestPlayer', label: 'Vinner av FIFAs best player of the tournament' },
 ]
 
+const scoringConfig = {
+  groupStage: {
+    correctOutcome: 1,
+    correctScoreBonus: 1,
+  },
+  knockoutProgression: {
+    roundOf16Team: 1,
+    quarterfinalTeam: 2,
+    semifinalTeam: 3,
+    finalTeam: 3,
+    correctBronzeWinner: 2,
+    correctFinalWinner: 5,
+  },
+  bonusQuestionCorrect: 4,
+}
+
 const initialState = {
   activeGroup: 'A',
   predictions: {},
@@ -379,8 +395,9 @@ function buildSubmissionPayload(bracket = null) {
     groupPredictionsCompact: buildCompactGroupPredictions(),
     knockoutPicksCompact: buildCompactKnockoutPicks(matches),
     bonusAnswersCompact: buildCompactBonusAnswers(),
-    scoringRules: 'exactScore=3;correctOutcome=1',
+    scoringRules: 'groupOutcome=1;groupExactResultBonus=1;R16=1;QF=2;SF=3;Final=3;BronzeWinner=2;FinalWinner=5;Bonus=4',
     aiInputVersion: 'vm2026.v1',
+    scoringConfigJson: JSON.stringify(scoringConfig),
     predictionsJson: JSON.stringify(state.predictions),
     knockoutWinnersJson: JSON.stringify(state.knockoutWinners),
     bonusAnswersJson: JSON.stringify(state.bonusAnswers),
@@ -395,7 +412,7 @@ function buildSubmissionPayload(bracket = null) {
         totalGroupGoals: String(calculatePredictedGroupGoals()),
         championId,
         champion: championName,
-        scoringRules: { exactScore: 3, correctOutcome: 1 },
+        scoringRules: scoringConfig,
         aiInputVersion: 'vm2026.v1',
       },
     }),

@@ -33,7 +33,8 @@ Viktige felt i eksporten:
 - `knockoutPicksCompact` med alle sluttspillvalg i ett kompakt felt
 - `bonusAnswersCompact` med alle bonusspørsmål i ett kompakt felt
 - `champion`, `championId` og `totalGroupGoals`
-- `scoringRules` (for eksempel `exactScore=3;correctOutcome=1`)
+- `scoringRules` (kompakt streng for rask parsing)
+- `scoringConfigJson` med komplett poengmodell
 - `aiInputVersion` for stabil parsing i AI-workflow
 - `predictionsJson`, `knockoutWinnersJson`, `bonusAnswersJson` som strukturerte felt en AI kan parse direkte
 - `payloadJson` med komplett state fra appen (backup for videre analyse)
@@ -46,8 +47,18 @@ For å gjøre scoring enkelt med AI etter eksport:
 2. Hent faktiske kampresultater (manuelt eller via API) i et eget datasett.
 3. Parse `predictionsJson` per deltaker.
 4. Beregn poeng med reglene:
-   - 3 poeng ved eksakt resultat.
-   - 1 poeng ved riktig tippetegn (H/U/B), men feil eksakt resultat.
+   - **Gruppespill**
+     - 1 poeng for riktig kamputfall.
+     - +1 tilleggspoeng for korrekt resultat.
+   - **Sluttspill**
+     - 1 poeng per riktig lag videre fra gruppespillet.
+     - 2 poeng per riktig lag til kvartfinale.
+     - 3 poeng per riktig lag til semifinale.
+     - 3 poeng per riktig lag til finale.
+     - 2 poeng for riktig bronsevinner.
+     - 5 poeng for riktig vinner av finalen.
+   - **Bonus**
+     - 4 poeng per riktig bonusspørsmål.
 5. Lag samlet score-tabell med:
    - deltaker
    - total poeng
