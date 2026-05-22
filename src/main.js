@@ -24,7 +24,7 @@ const bonusQuestions = [
   { id: 'roughestTeam', label: 'Råtass-laget (flest poeng for gule og røde kort)', suggestions: 'teams' },
   { id: 'penaltyShootoutMatches', label: 'Antall sluttspillkamper som avgjøres på straffer (bruk tall, 0 er gyldig svar)', inputMode: 'numeric' },
   { id: 'mostPenaltiesTeam', label: 'Hvilket lag får flest straffer (ikke inkludert straffesparkkonkurranse)?', suggestions: 'teams' },
-  { id: 'starGoals', label: 'Hvor mange mål skårer Mbappe, Kane og Haaland til sammen?', inputMode: 'numeric' },
+  { id: 'starGoals', label: 'Hvor mange mål skårer Haaland, Dzeko og Olise til sammen?', inputMode: 'numeric' },
   { id: 'youngPlayer', label: 'Vinner av FIFAs young player of the tournament' },
   { id: 'bestPlayer', label: 'Vinner av FIFAs best player of the tournament' },
 ]
@@ -197,6 +197,28 @@ function parseBonusNumber(value) {
   return Number.isFinite(parsed) ? parsed : 0
 }
 
+function toCompactPairMap(rows) {
+  return rows.map(([key, value]) => `${key}=${String(value ?? '').trim()}`).join(' | ')
+}
+
+function buildCompactGroupPredictions() {
+  return toCompactPairMap(groupMatches.flatMap((match) => {
+    const prediction = state.predictions[match.id] ?? {}
+    return [
+      [`${match.id}_home`, prediction.home ?? ''],
+      [`${match.id}_away`, prediction.away ?? ''],
+    ]
+  }))
+}
+
+function buildCompactKnockoutPicks(matches) {
+  return toCompactPairMap(matches.map((match) => [match.id, state.knockoutWinners[match.id] ?? '']))
+}
+
+function buildCompactBonusAnswers() {
+  return toCompactPairMap(bonusQuestions.map((question) => [question.id, state.bonusAnswers[question.id] ?? '']))
+}
+
 
 function getSuggestionOptions(question) {
   const teamOptions = teams.map((team) => state.customTeamNames[team.id] || team.name)
@@ -345,7 +367,8 @@ function buildSubmissionPayload(bracket = null) {
   const matches = bracket ?? buildCurrentBracket()
   const championId = state.knockoutWinners.M104 ?? ''
   const championName = championId ? displayName(championId) : ''
-  const payload = {
+
+  return {
     formName: NETLIFY_FORM_NAME,
     firstName: state.participant.firstName.trim(),
     lastName: state.participant.lastName.trim(),
@@ -354,40 +377,23 @@ function buildSubmissionPayload(bracket = null) {
     totalGroupGoals: String(calculatePredictedGroupGoals()),
     championId,
     champion: championName,
+    groupPredictionsCompact: buildCompactGroupPredictions(),
+    knockoutPicksCompact: buildCompactKnockoutPicks(matches),
+    bonusAnswersCompact: buildCompactBonusAnswers(),
+    payloadJson: JSON.stringify({
+      participant: { ...state.participant },
+      predictions: state.predictions,
+      bonusAnswers: state.bonusAnswers,
+      knockoutWinners: state.knockoutWinners,
+      customTeamNames: state.customTeamNames,
+      summary: {
+        submittedAt,
+        totalGroupGoals: String(calculatePredictedGroupGoals()),
+        championId,
+        champion: championName,
+      },
+    }),
   }
-
-  groupMatches.forEach((match) => {
-    const prediction = state.predictions[match.id] ?? {}
-    payload[`match_${match.id}_home`] = prediction.home ?? ''
-    payload[`match_${match.id}_away`] = prediction.away ?? ''
-    payload[`match_${match.id}_label`] = `${displayName(match.home)} - ${displayName(match.away)}`
-  })
-
-  bonusQuestions.forEach((question) => {
-    payload[`bonus_${question.id}`] = state.bonusAnswers[question.id] ?? ''
-  })
-
-  matches.forEach((match) => {
-    const winnerId = state.knockoutWinners[match.id] ?? ''
-    payload[`knockout_${match.id}_winnerId`] = winnerId
-    payload[`knockout_${match.id}_winner`] = winnerId ? displayName(winnerId) : ''
-  })
-
-  payload.payloadJson = JSON.stringify({
-    participant: payload.firstName || payload.lastName || payload.email ? { ...state.participant } : {},
-    predictions: state.predictions,
-    bonusAnswers: state.bonusAnswers,
-    knockoutWinners: state.knockoutWinners,
-    customTeamNames: state.customTeamNames,
-    summary: {
-      submittedAt,
-      totalGroupGoals: payload.totalGroupGoals,
-      championId,
-      champion: championName,
-    },
-  })
-
-  return payload
 }
 
 function encodeFormData(payload) {
@@ -555,6 +561,26 @@ function render() {
         </aside>
       </section>
 
+      <section class="panel legends-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Favoritter</p>
+            <h2>Legender på plakaten</h2>
+          </div>
+          <p>En liten hyllest til Edin Džeko og Luka Modrić før tippingen starter.</p>
+        </div>
+        <div class="legend-players">
+          <figure class="legend-player">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Edin_Dzeko_2021.jpg/640px-Edin_Dzeko_2021.jpg" alt="Edin Džeko" loading="lazy" />
+            <figcaption><strong>Edin Džeko</strong><small>Bosnias målmaskin</small></figcaption>
+          </figure>
+          <figure class="legend-player">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Luka_Modri%C4%87_2018.jpg/640px-Luka_Modri%C4%87_2018.jpg" alt="Luka Modrić" loading="lazy" />
+            <figcaption><strong>Luka Modrić</strong><small>Kroatias maestro</small></figcaption>
+          </figure>
+        </div>
+      </section>
+
       <section class="panel participant-panel">
         <div class="section-heading">
           <div>
@@ -574,7 +600,7 @@ function render() {
           </label>
           <label>
             <span>E-post</span>
-            <input data-participant="email" type="email" value="${escapeAttribute(state.participant.email)}" autocomplete="email" aria-label="E-post" />
+            <input data-participant="email" type="text" inputmode="email" spellcheck="false" autocapitalize="none" autocorrect="off" value="${escapeAttribute(state.participant.email)}" autocomplete="email" aria-label="E-post" />
           </label>
         </div>
       </section>

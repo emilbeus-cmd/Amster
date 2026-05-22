@@ -175,6 +175,43 @@ main {
 }
 
 
+
+.legends-panel {
+  border-color: var(--deloitte-green);
+}
+
+.legend-players {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.legend-player {
+  margin: 0;
+  border: 1px solid var(--deloitte-gray-200);
+  background: linear-gradient(180deg, #0f0f0f 0%, #1b1b1b 100%);
+  color: var(--white);
+  overflow: hidden;
+}
+
+.legend-player img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  filter: saturate(1.05) contrast(1.03);
+}
+
+.legend-player figcaption {
+  display: grid;
+  gap: 2px;
+  padding: 12px;
+}
+
+.legend-player figcaption small {
+  color: rgba(255, 255, 255, 0.8);
+}
+
 .participant-panel {
   border-color: var(--deloitte-green);
 }
@@ -673,7 +710,8 @@ td:last-child {
 
   .group-tabs,
   .participant-grid,
-  .submit-summary {
+  .submit-summary,
+  .legend-players {
     grid-template-columns: 1fr;
   }
 

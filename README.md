@@ -29,11 +29,11 @@ Appen inneholder et skjult Netlify-skjema i `index.html` og `vm-2026-tipping.htm
 Viktige felt i eksporten:
 
 - `firstName`, `lastName`, `email` og `submittedAt`
-- `match_A-1_home`, `match_A-1_away` osv. for gruppespilltips
-- `bonus_bestPlayer`, `bonus_youngPlayer` osv. for bonusspørsmål
-- `knockout_M73_winner`, `knockout_M104_winner` osv. for sluttspillvalg
-- `champion` og `championId`
-- `payloadJson` med komplett state fra appen
+- `groupPredictionsCompact` med alle gruppespilltips i ett kompakt felt
+- `knockoutPicksCompact` med alle sluttspillvalg i ett kompakt felt
+- `bonusAnswersCompact` med alle bonusspørsmål i ett kompakt felt
+- `champion`, `championId` og `totalGroupGoals`
+- `payloadJson` med komplett state fra appen (backup for videre analyse)
 
 
 ## Feilsøking av Netlify-innsending

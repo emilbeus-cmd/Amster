@@ -182,6 +182,43 @@ main {
 }
 
 
+
+.legends-panel {
+  border-color: var(--deloitte-green);
+}
+
+.legend-players {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.legend-player {
+  margin: 0;
+  border: 1px solid var(--deloitte-gray-200);
+  background: linear-gradient(180deg, #0f0f0f 0%, #1b1b1b 100%);
+  color: var(--white);
+  overflow: hidden;
+}
+
+.legend-player img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  filter: saturate(1.05) contrast(1.03);
+}
+
+.legend-player figcaption {
+  display: grid;
+  gap: 2px;
+  padding: 12px;
+}
+
+.legend-player figcaption small {
+  color: rgba(255, 255, 255, 0.8);
+}
+
 .participant-panel {
   border-color: var(--deloitte-green);
 }
@@ -680,7 +717,8 @@ td:last-child {
 
   .group-tabs,
   .participant-grid,
-  .submit-summary {
+  .submit-summary,
+  .legend-players {
     grid-template-columns: 1fr;
   }
 
@@ -714,294 +752,10 @@ td:last-child {
       <input type="hidden" name="totalGroupGoals" />
       <input type="hidden" name="championId" />
       <input type="hidden" name="champion" />
+      <input type="hidden" name="groupPredictionsCompact" />
+      <input type="hidden" name="knockoutPicksCompact" />
+      <input type="hidden" name="bonusAnswersCompact" />
       <input type="hidden" name="payloadJson" />
-      <input type="hidden" name="match_A-1_home" />
-      <input type="hidden" name="match_A-1_away" />
-      <input type="hidden" name="match_A-1_label" />
-      <input type="hidden" name="match_A-2_home" />
-      <input type="hidden" name="match_A-2_away" />
-      <input type="hidden" name="match_A-2_label" />
-      <input type="hidden" name="match_A-3_home" />
-      <input type="hidden" name="match_A-3_away" />
-      <input type="hidden" name="match_A-3_label" />
-      <input type="hidden" name="match_A-4_home" />
-      <input type="hidden" name="match_A-4_away" />
-      <input type="hidden" name="match_A-4_label" />
-      <input type="hidden" name="match_A-5_home" />
-      <input type="hidden" name="match_A-5_away" />
-      <input type="hidden" name="match_A-5_label" />
-      <input type="hidden" name="match_A-6_home" />
-      <input type="hidden" name="match_A-6_away" />
-      <input type="hidden" name="match_A-6_label" />
-      <input type="hidden" name="match_B-1_home" />
-      <input type="hidden" name="match_B-1_away" />
-      <input type="hidden" name="match_B-1_label" />
-      <input type="hidden" name="match_B-2_home" />
-      <input type="hidden" name="match_B-2_away" />
-      <input type="hidden" name="match_B-2_label" />
-      <input type="hidden" name="match_B-3_home" />
-      <input type="hidden" name="match_B-3_away" />
-      <input type="hidden" name="match_B-3_label" />
-      <input type="hidden" name="match_B-4_home" />
-      <input type="hidden" name="match_B-4_away" />
-      <input type="hidden" name="match_B-4_label" />
-      <input type="hidden" name="match_B-5_home" />
-      <input type="hidden" name="match_B-5_away" />
-      <input type="hidden" name="match_B-5_label" />
-      <input type="hidden" name="match_B-6_home" />
-      <input type="hidden" name="match_B-6_away" />
-      <input type="hidden" name="match_B-6_label" />
-      <input type="hidden" name="match_C-1_home" />
-      <input type="hidden" name="match_C-1_away" />
-      <input type="hidden" name="match_C-1_label" />
-      <input type="hidden" name="match_C-2_home" />
-      <input type="hidden" name="match_C-2_away" />
-      <input type="hidden" name="match_C-2_label" />
-      <input type="hidden" name="match_C-3_home" />
-      <input type="hidden" name="match_C-3_away" />
-      <input type="hidden" name="match_C-3_label" />
-      <input type="hidden" name="match_C-4_home" />
-      <input type="hidden" name="match_C-4_away" />
-      <input type="hidden" name="match_C-4_label" />
-      <input type="hidden" name="match_C-5_home" />
-      <input type="hidden" name="match_C-5_away" />
-      <input type="hidden" name="match_C-5_label" />
-      <input type="hidden" name="match_C-6_home" />
-      <input type="hidden" name="match_C-6_away" />
-      <input type="hidden" name="match_C-6_label" />
-      <input type="hidden" name="match_D-1_home" />
-      <input type="hidden" name="match_D-1_away" />
-      <input type="hidden" name="match_D-1_label" />
-      <input type="hidden" name="match_D-2_home" />
-      <input type="hidden" name="match_D-2_away" />
-      <input type="hidden" name="match_D-2_label" />
-      <input type="hidden" name="match_D-3_home" />
-      <input type="hidden" name="match_D-3_away" />
-      <input type="hidden" name="match_D-3_label" />
-      <input type="hidden" name="match_D-4_home" />
-      <input type="hidden" name="match_D-4_away" />
-      <input type="hidden" name="match_D-4_label" />
-      <input type="hidden" name="match_D-5_home" />
-      <input type="hidden" name="match_D-5_away" />
-      <input type="hidden" name="match_D-5_label" />
-      <input type="hidden" name="match_D-6_home" />
-      <input type="hidden" name="match_D-6_away" />
-      <input type="hidden" name="match_D-6_label" />
-      <input type="hidden" name="match_E-1_home" />
-      <input type="hidden" name="match_E-1_away" />
-      <input type="hidden" name="match_E-1_label" />
-      <input type="hidden" name="match_E-2_home" />
-      <input type="hidden" name="match_E-2_away" />
-      <input type="hidden" name="match_E-2_label" />
-      <input type="hidden" name="match_E-3_home" />
-      <input type="hidden" name="match_E-3_away" />
-      <input type="hidden" name="match_E-3_label" />
-      <input type="hidden" name="match_E-4_home" />
-      <input type="hidden" name="match_E-4_away" />
-      <input type="hidden" name="match_E-4_label" />
-      <input type="hidden" name="match_E-5_home" />
-      <input type="hidden" name="match_E-5_away" />
-      <input type="hidden" name="match_E-5_label" />
-      <input type="hidden" name="match_E-6_home" />
-      <input type="hidden" name="match_E-6_away" />
-      <input type="hidden" name="match_E-6_label" />
-      <input type="hidden" name="match_F-1_home" />
-      <input type="hidden" name="match_F-1_away" />
-      <input type="hidden" name="match_F-1_label" />
-      <input type="hidden" name="match_F-2_home" />
-      <input type="hidden" name="match_F-2_away" />
-      <input type="hidden" name="match_F-2_label" />
-      <input type="hidden" name="match_F-3_home" />
-      <input type="hidden" name="match_F-3_away" />
-      <input type="hidden" name="match_F-3_label" />
-      <input type="hidden" name="match_F-4_home" />
-      <input type="hidden" name="match_F-4_away" />
-      <input type="hidden" name="match_F-4_label" />
-      <input type="hidden" name="match_F-5_home" />
-      <input type="hidden" name="match_F-5_away" />
-      <input type="hidden" name="match_F-5_label" />
-      <input type="hidden" name="match_F-6_home" />
-      <input type="hidden" name="match_F-6_away" />
-      <input type="hidden" name="match_F-6_label" />
-      <input type="hidden" name="match_G-1_home" />
-      <input type="hidden" name="match_G-1_away" />
-      <input type="hidden" name="match_G-1_label" />
-      <input type="hidden" name="match_G-2_home" />
-      <input type="hidden" name="match_G-2_away" />
-      <input type="hidden" name="match_G-2_label" />
-      <input type="hidden" name="match_G-3_home" />
-      <input type="hidden" name="match_G-3_away" />
-      <input type="hidden" name="match_G-3_label" />
-      <input type="hidden" name="match_G-4_home" />
-      <input type="hidden" name="match_G-4_away" />
-      <input type="hidden" name="match_G-4_label" />
-      <input type="hidden" name="match_G-5_home" />
-      <input type="hidden" name="match_G-5_away" />
-      <input type="hidden" name="match_G-5_label" />
-      <input type="hidden" name="match_G-6_home" />
-      <input type="hidden" name="match_G-6_away" />
-      <input type="hidden" name="match_G-6_label" />
-      <input type="hidden" name="match_H-1_home" />
-      <input type="hidden" name="match_H-1_away" />
-      <input type="hidden" name="match_H-1_label" />
-      <input type="hidden" name="match_H-2_home" />
-      <input type="hidden" name="match_H-2_away" />
-      <input type="hidden" name="match_H-2_label" />
-      <input type="hidden" name="match_H-3_home" />
-      <input type="hidden" name="match_H-3_away" />
-      <input type="hidden" name="match_H-3_label" />
-      <input type="hidden" name="match_H-4_home" />
-      <input type="hidden" name="match_H-4_away" />
-      <input type="hidden" name="match_H-4_label" />
-      <input type="hidden" name="match_H-5_home" />
-      <input type="hidden" name="match_H-5_away" />
-      <input type="hidden" name="match_H-5_label" />
-      <input type="hidden" name="match_H-6_home" />
-      <input type="hidden" name="match_H-6_away" />
-      <input type="hidden" name="match_H-6_label" />
-      <input type="hidden" name="match_I-1_home" />
-      <input type="hidden" name="match_I-1_away" />
-      <input type="hidden" name="match_I-1_label" />
-      <input type="hidden" name="match_I-2_home" />
-      <input type="hidden" name="match_I-2_away" />
-      <input type="hidden" name="match_I-2_label" />
-      <input type="hidden" name="match_I-3_home" />
-      <input type="hidden" name="match_I-3_away" />
-      <input type="hidden" name="match_I-3_label" />
-      <input type="hidden" name="match_I-4_home" />
-      <input type="hidden" name="match_I-4_away" />
-      <input type="hidden" name="match_I-4_label" />
-      <input type="hidden" name="match_I-5_home" />
-      <input type="hidden" name="match_I-5_away" />
-      <input type="hidden" name="match_I-5_label" />
-      <input type="hidden" name="match_I-6_home" />
-      <input type="hidden" name="match_I-6_away" />
-      <input type="hidden" name="match_I-6_label" />
-      <input type="hidden" name="match_J-1_home" />
-      <input type="hidden" name="match_J-1_away" />
-      <input type="hidden" name="match_J-1_label" />
-      <input type="hidden" name="match_J-2_home" />
-      <input type="hidden" name="match_J-2_away" />
-      <input type="hidden" name="match_J-2_label" />
-      <input type="hidden" name="match_J-3_home" />
-      <input type="hidden" name="match_J-3_away" />
-      <input type="hidden" name="match_J-3_label" />
-      <input type="hidden" name="match_J-4_home" />
-      <input type="hidden" name="match_J-4_away" />
-      <input type="hidden" name="match_J-4_label" />
-      <input type="hidden" name="match_J-5_home" />
-      <input type="hidden" name="match_J-5_away" />
-      <input type="hidden" name="match_J-5_label" />
-      <input type="hidden" name="match_J-6_home" />
-      <input type="hidden" name="match_J-6_away" />
-      <input type="hidden" name="match_J-6_label" />
-      <input type="hidden" name="match_K-1_home" />
-      <input type="hidden" name="match_K-1_away" />
-      <input type="hidden" name="match_K-1_label" />
-      <input type="hidden" name="match_K-2_home" />
-      <input type="hidden" name="match_K-2_away" />
-      <input type="hidden" name="match_K-2_label" />
-      <input type="hidden" name="match_K-3_home" />
-      <input type="hidden" name="match_K-3_away" />
-      <input type="hidden" name="match_K-3_label" />
-      <input type="hidden" name="match_K-4_home" />
-      <input type="hidden" name="match_K-4_away" />
-      <input type="hidden" name="match_K-4_label" />
-      <input type="hidden" name="match_K-5_home" />
-      <input type="hidden" name="match_K-5_away" />
-      <input type="hidden" name="match_K-5_label" />
-      <input type="hidden" name="match_K-6_home" />
-      <input type="hidden" name="match_K-6_away" />
-      <input type="hidden" name="match_K-6_label" />
-      <input type="hidden" name="match_L-1_home" />
-      <input type="hidden" name="match_L-1_away" />
-      <input type="hidden" name="match_L-1_label" />
-      <input type="hidden" name="match_L-2_home" />
-      <input type="hidden" name="match_L-2_away" />
-      <input type="hidden" name="match_L-2_label" />
-      <input type="hidden" name="match_L-3_home" />
-      <input type="hidden" name="match_L-3_away" />
-      <input type="hidden" name="match_L-3_label" />
-      <input type="hidden" name="match_L-4_home" />
-      <input type="hidden" name="match_L-4_away" />
-      <input type="hidden" name="match_L-4_label" />
-      <input type="hidden" name="match_L-5_home" />
-      <input type="hidden" name="match_L-5_away" />
-      <input type="hidden" name="match_L-5_label" />
-      <input type="hidden" name="match_L-6_home" />
-      <input type="hidden" name="match_L-6_away" />
-      <input type="hidden" name="match_L-6_label" />
-      <input type="hidden" name="bonus_mostGoalsTeam" />
-      <input type="hidden" name="bonus_mostConcededTeam" />
-      <input type="hidden" name="bonus_scorelessTeam" />
-      <input type="hidden" name="bonus_roughestTeam" />
-      <input type="hidden" name="bonus_penaltyShootoutMatches" />
-      <input type="hidden" name="bonus_mostPenaltiesTeam" />
-      <input type="hidden" name="bonus_starGoals" />
-      <input type="hidden" name="bonus_youngPlayer" />
-      <input type="hidden" name="bonus_bestPlayer" />
-      <input type="hidden" name="knockout_M73_winnerId" />
-      <input type="hidden" name="knockout_M73_winner" />
-      <input type="hidden" name="knockout_M74_winnerId" />
-      <input type="hidden" name="knockout_M74_winner" />
-      <input type="hidden" name="knockout_M75_winnerId" />
-      <input type="hidden" name="knockout_M75_winner" />
-      <input type="hidden" name="knockout_M76_winnerId" />
-      <input type="hidden" name="knockout_M76_winner" />
-      <input type="hidden" name="knockout_M77_winnerId" />
-      <input type="hidden" name="knockout_M77_winner" />
-      <input type="hidden" name="knockout_M78_winnerId" />
-      <input type="hidden" name="knockout_M78_winner" />
-      <input type="hidden" name="knockout_M79_winnerId" />
-      <input type="hidden" name="knockout_M79_winner" />
-      <input type="hidden" name="knockout_M80_winnerId" />
-      <input type="hidden" name="knockout_M80_winner" />
-      <input type="hidden" name="knockout_M81_winnerId" />
-      <input type="hidden" name="knockout_M81_winner" />
-      <input type="hidden" name="knockout_M82_winnerId" />
-      <input type="hidden" name="knockout_M82_winner" />
-      <input type="hidden" name="knockout_M83_winnerId" />
-      <input type="hidden" name="knockout_M83_winner" />
-      <input type="hidden" name="knockout_M84_winnerId" />
-      <input type="hidden" name="knockout_M84_winner" />
-      <input type="hidden" name="knockout_M85_winnerId" />
-      <input type="hidden" name="knockout_M85_winner" />
-      <input type="hidden" name="knockout_M86_winnerId" />
-      <input type="hidden" name="knockout_M86_winner" />
-      <input type="hidden" name="knockout_M87_winnerId" />
-      <input type="hidden" name="knockout_M87_winner" />
-      <input type="hidden" name="knockout_M88_winnerId" />
-      <input type="hidden" name="knockout_M88_winner" />
-      <input type="hidden" name="knockout_M89_winnerId" />
-      <input type="hidden" name="knockout_M89_winner" />
-      <input type="hidden" name="knockout_M90_winnerId" />
-      <input type="hidden" name="knockout_M90_winner" />
-      <input type="hidden" name="knockout_M91_winnerId" />
-      <input type="hidden" name="knockout_M91_winner" />
-      <input type="hidden" name="knockout_M92_winnerId" />
-      <input type="hidden" name="knockout_M92_winner" />
-      <input type="hidden" name="knockout_M93_winnerId" />
-      <input type="hidden" name="knockout_M93_winner" />
-      <input type="hidden" name="knockout_M94_winnerId" />
-      <input type="hidden" name="knockout_M94_winner" />
-      <input type="hidden" name="knockout_M95_winnerId" />
-      <input type="hidden" name="knockout_M95_winner" />
-      <input type="hidden" name="knockout_M96_winnerId" />
-      <input type="hidden" name="knockout_M96_winner" />
-      <input type="hidden" name="knockout_M97_winnerId" />
-      <input type="hidden" name="knockout_M97_winner" />
-      <input type="hidden" name="knockout_M98_winnerId" />
-      <input type="hidden" name="knockout_M98_winner" />
-      <input type="hidden" name="knockout_M99_winnerId" />
-      <input type="hidden" name="knockout_M99_winner" />
-      <input type="hidden" name="knockout_M100_winnerId" />
-      <input type="hidden" name="knockout_M100_winner" />
-      <input type="hidden" name="knockout_M101_winnerId" />
-      <input type="hidden" name="knockout_M101_winner" />
-      <input type="hidden" name="knockout_M102_winnerId" />
-      <input type="hidden" name="knockout_M102_winner" />
-      <input type="hidden" name="knockout_M104_winnerId" />
-      <input type="hidden" name="knockout_M104_winner" />
     </form>
     <div id="root"></div>
     <script>
@@ -1499,7 +1253,7 @@ const bonusQuestions = [
   { id: 'roughestTeam', label: 'Råtass-laget (flest poeng for gule og røde kort)', suggestions: 'teams' },
   { id: 'penaltyShootoutMatches', label: 'Antall sluttspillkamper som avgjøres på straffer (bruk tall, 0 er gyldig svar)', inputMode: 'numeric' },
   { id: 'mostPenaltiesTeam', label: 'Hvilket lag får flest straffer (ikke inkludert straffesparkkonkurranse)?', suggestions: 'teams' },
-  { id: 'starGoals', label: 'Hvor mange mål skårer Mbappe, Kane og Haaland til sammen?', inputMode: 'numeric' },
+  { id: 'starGoals', label: 'Hvor mange mål skårer Haaland, Dzeko og Olise til sammen?', inputMode: 'numeric' },
   { id: 'youngPlayer', label: 'Vinner av FIFAs young player of the tournament' },
   { id: 'bestPlayer', label: 'Vinner av FIFAs best player of the tournament' },
 ]
@@ -1672,6 +1426,28 @@ function parseBonusNumber(value) {
   return Number.isFinite(parsed) ? parsed : 0
 }
 
+function toCompactPairMap(rows) {
+  return rows.map(([key, value]) => `${key}=${String(value ?? '').trim()}`).join(' | ')
+}
+
+function buildCompactGroupPredictions() {
+  return toCompactPairMap(groupMatches.flatMap((match) => {
+    const prediction = state.predictions[match.id] ?? {}
+    return [
+      [`${match.id}_home`, prediction.home ?? ''],
+      [`${match.id}_away`, prediction.away ?? ''],
+    ]
+  }))
+}
+
+function buildCompactKnockoutPicks(matches) {
+  return toCompactPairMap(matches.map((match) => [match.id, state.knockoutWinners[match.id] ?? '']))
+}
+
+function buildCompactBonusAnswers() {
+  return toCompactPairMap(bonusQuestions.map((question) => [question.id, state.bonusAnswers[question.id] ?? '']))
+}
+
 
 function getSuggestionOptions(question) {
   const teamOptions = teams.map((team) => state.customTeamNames[team.id] || team.name)
@@ -1820,7 +1596,8 @@ function buildSubmissionPayload(bracket = null) {
   const matches = bracket ?? buildCurrentBracket()
   const championId = state.knockoutWinners.M104 ?? ''
   const championName = championId ? displayName(championId) : ''
-  const payload = {
+
+  return {
     formName: NETLIFY_FORM_NAME,
     firstName: state.participant.firstName.trim(),
     lastName: state.participant.lastName.trim(),
@@ -1829,40 +1606,23 @@ function buildSubmissionPayload(bracket = null) {
     totalGroupGoals: String(calculatePredictedGroupGoals()),
     championId,
     champion: championName,
+    groupPredictionsCompact: buildCompactGroupPredictions(),
+    knockoutPicksCompact: buildCompactKnockoutPicks(matches),
+    bonusAnswersCompact: buildCompactBonusAnswers(),
+    payloadJson: JSON.stringify({
+      participant: { ...state.participant },
+      predictions: state.predictions,
+      bonusAnswers: state.bonusAnswers,
+      knockoutWinners: state.knockoutWinners,
+      customTeamNames: state.customTeamNames,
+      summary: {
+        submittedAt,
+        totalGroupGoals: String(calculatePredictedGroupGoals()),
+        championId,
+        champion: championName,
+      },
+    }),
   }
-
-  groupMatches.forEach((match) => {
-    const prediction = state.predictions[match.id] ?? {}
-    payload[`match_${match.id}_home`] = prediction.home ?? ''
-    payload[`match_${match.id}_away`] = prediction.away ?? ''
-    payload[`match_${match.id}_label`] = `${displayName(match.home)} - ${displayName(match.away)}`
-  })
-
-  bonusQuestions.forEach((question) => {
-    payload[`bonus_${question.id}`] = state.bonusAnswers[question.id] ?? ''
-  })
-
-  matches.forEach((match) => {
-    const winnerId = state.knockoutWinners[match.id] ?? ''
-    payload[`knockout_${match.id}_winnerId`] = winnerId
-    payload[`knockout_${match.id}_winner`] = winnerId ? displayName(winnerId) : ''
-  })
-
-  payload.payloadJson = JSON.stringify({
-    participant: payload.firstName || payload.lastName || payload.email ? { ...state.participant } : {},
-    predictions: state.predictions,
-    bonusAnswers: state.bonusAnswers,
-    knockoutWinners: state.knockoutWinners,
-    customTeamNames: state.customTeamNames,
-    summary: {
-      submittedAt,
-      totalGroupGoals: payload.totalGroupGoals,
-      championId,
-      champion: championName,
-    },
-  })
-
-  return payload
 }
 
 function encodeFormData(payload) {
@@ -2030,6 +1790,26 @@ function render() {
         </aside>
       </section>
 
+      <section class="panel legends-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Favoritter</p>
+            <h2>Legender på plakaten</h2>
+          </div>
+          <p>En liten hyllest til Edin Džeko og Luka Modrić før tippingen starter.</p>
+        </div>
+        <div class="legend-players">
+          <figure class="legend-player">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Edin_Dzeko_2021.jpg/640px-Edin_Dzeko_2021.jpg" alt="Edin Džeko" loading="lazy" />
+            <figcaption><strong>Edin Džeko</strong><small>Bosnias målmaskin</small></figcaption>
+          </figure>
+          <figure class="legend-player">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Luka_Modri%C4%87_2018.jpg/640px-Luka_Modri%C4%87_2018.jpg" alt="Luka Modrić" loading="lazy" />
+            <figcaption><strong>Luka Modrić</strong><small>Kroatias maestro</small></figcaption>
+          </figure>
+        </div>
+      </section>
+
       <section class="panel participant-panel">
         <div class="section-heading">
           <div>
@@ -2049,7 +1829,7 @@ function render() {
           </label>
           <label>
             <span>E-post</span>
-            <input data-participant="email" type="email" value="${escapeAttribute(state.participant.email)}" autocomplete="email" aria-label="E-post" />
+            <input data-participant="email" type="text" inputmode="email" spellcheck="false" autocapitalize="none" autocorrect="off" value="${escapeAttribute(state.participant.email)}" autocomplete="email" aria-label="E-post" />
           </label>
         </div>
       </section>
