@@ -524,10 +524,6 @@ function goToRelativeGroup(direction) {
   setActiveGroup(groupIds[nextIndex])
 }
 
-function resetAll() {
-  persist(cloneState(initialState))
-}
-
 function render() {
   const app = document.querySelector('#root')
   if (!app) return
@@ -545,11 +541,21 @@ function render() {
       <section class="hero">
         <div>
           <p class="eyebrow">Deloitte · VM 2026 tippekonkurranse</p>
-          <h1>Tipp én gruppe av gangen – se tabellen endre seg direkte</h1>
+          <h1>VM 2026 tippekonkurranse</h1>
           <p>
             Fyll inn konkrete resultater, for eksempel 3–1 til Frankrike over Norge. Appen rangerer lagene gruppe for gruppe,
             bruker innbyrdes oppgjør der det er poenglikhet, og sender gruppevinnere, gruppetoere og de åtte beste treerne videre.
           </p>
+        </div>
+        <div class="hero-legends" aria-label="Profilbilder av Edin Džeko og Luka Modrić">
+          <figure class="hero-legend">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Edin_Dzeko_2021.jpg/640px-Edin_Dzeko_2021.jpg" alt="Edin Džeko" loading="lazy" />
+            <figcaption>Edin Džeko</figcaption>
+          </figure>
+          <figure class="hero-legend">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Luka_Modri%C4%87_2018.jpg/640px-Luka_Modri%C4%87_2018.jpg" alt="Luka Modrić" loading="lazy" />
+            <figcaption>Luka Modrić</figcaption>
+          </figure>
         </div>
         <aside class="status-card">
           <span>${completedGroupMatches} / ${groupMatches.length}</span>
@@ -557,28 +563,7 @@ function render() {
           <small>Aktiv gruppe ${state.activeGroup}: ${activeProgress.completed}/${activeProgress.total} kamper</small>
           <small>Mester: ${escapeHtml(championName)}</small>
           ${champion?.home?.team && champion?.away?.team ? `<small>Finale: ${escapeHtml(champion.home.team.name)} – ${escapeHtml(champion.away.team.name)}</small>` : ''}
-          <button data-action="reset">Nullstill demo</button>
         </aside>
-      </section>
-
-      <section class="panel legends-panel">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Favoritter</p>
-            <h2>Legender på plakaten</h2>
-          </div>
-          <p>En liten hyllest til Edin Džeko og Luka Modrić før tippingen starter.</p>
-        </div>
-        <div class="legend-players">
-          <figure class="legend-player">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Edin_Dzeko_2021.jpg/640px-Edin_Dzeko_2021.jpg" alt="Edin Džeko" loading="lazy" />
-            <figcaption><strong>Edin Džeko</strong><small>Bosnias målmaskin</small></figcaption>
-          </figure>
-          <figure class="legend-player">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Luka_Modri%C4%87_2018.jpg/640px-Luka_Modri%C4%87_2018.jpg" alt="Luka Modrić" loading="lazy" />
-            <figcaption><strong>Luka Modrić</strong><small>Kroatias maestro</small></figcaption>
-          </figure>
-        </div>
       </section>
 
       <section class="panel participant-panel">
@@ -661,7 +646,6 @@ function render() {
     </main>
   `
 
-  app.querySelector('[data-action="reset"]')?.addEventListener('click', resetAll)
   app.querySelector('[data-action="submit-tips"]')?.addEventListener('click', () => submitTips(bracket))
   app.querySelectorAll('[data-group]').forEach((button) => {
     button.addEventListener('click', (event) => setActiveGroup(event.currentTarget.dataset.group))

@@ -54,7 +54,7 @@ main {
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 320px) 340px;
   gap: 24px;
   align-items: stretch;
   padding: 42px;
@@ -80,6 +80,33 @@ main {
   color: rgba(255, 255, 255, 0.76);
   font-size: 1.12rem;
   line-height: 1.7;
+}
+
+.hero-legends {
+  display: grid;
+  gap: 10px;
+  align-content: center;
+}
+
+.hero-legend {
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  background: rgba(0, 0, 0, 0.36);
+  overflow: hidden;
+}
+
+.hero-legend img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.hero-legend figcaption {
+  padding: 8px 10px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .eyebrow {
@@ -126,14 +153,12 @@ main {
   line-height: 1.4;
 }
 
-.status-card button,
 .group-nav button,
 .group-tabs button,
 .knockout-match button {
   transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
 }
 
-.status-card button,
 .group-nav button {
   margin-top: 12px;
   border: 1px solid var(--deloitte-green);
@@ -143,7 +168,6 @@ main {
   font-weight: 900;
 }
 
-.status-card button:hover,
 .group-nav button:hover:not(:disabled),
 .group-tabs button:hover {
   transform: translateY(-1px);
@@ -181,43 +205,6 @@ main {
   line-height: 1.6;
 }
 
-
-
-.legends-panel {
-  border-color: var(--deloitte-green);
-}
-
-.legend-players {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(240px, 1fr));
-  gap: 16px;
-}
-
-.legend-player {
-  margin: 0;
-  border: 1px solid var(--deloitte-gray-200);
-  background: linear-gradient(180deg, #0f0f0f 0%, #1b1b1b 100%);
-  color: var(--white);
-  overflow: hidden;
-}
-
-.legend-player img {
-  display: block;
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  object-fit: cover;
-  filter: saturate(1.05) contrast(1.03);
-}
-
-.legend-player figcaption {
-  display: grid;
-  gap: 2px;
-  padding: 12px;
-}
-
-.legend-player figcaption small {
-  color: rgba(255, 255, 255, 0.8);
-}
 
 .participant-panel {
   border-color: var(--deloitte-green);
@@ -717,8 +704,7 @@ td:last-child {
 
   .group-tabs,
   .participant-grid,
-  .submit-summary,
-  .legend-players {
+  .submit-summary {
     grid-template-columns: 1fr;
   }
 
@@ -1753,10 +1739,6 @@ function goToRelativeGroup(direction) {
   setActiveGroup(groupIds[nextIndex])
 }
 
-function resetAll() {
-  persist(cloneState(initialState))
-}
-
 function render() {
   const app = document.querySelector('#root')
   if (!app) return
@@ -1774,11 +1756,21 @@ function render() {
       <section class="hero">
         <div>
           <p class="eyebrow">Deloitte · VM 2026 tippekonkurranse</p>
-          <h1>Tipp én gruppe av gangen – se tabellen endre seg direkte</h1>
+          <h1>VM 2026 tippekonkurranse</h1>
           <p>
             Fyll inn konkrete resultater, for eksempel 3–1 til Frankrike over Norge. Appen rangerer lagene gruppe for gruppe,
             bruker innbyrdes oppgjør der det er poenglikhet, og sender gruppevinnere, gruppetoere og de åtte beste treerne videre.
           </p>
+        </div>
+        <div class="hero-legends" aria-label="Profilbilder av Edin Džeko og Luka Modrić">
+          <figure class="hero-legend">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Edin_Dzeko_2021.jpg/640px-Edin_Dzeko_2021.jpg" alt="Edin Džeko" loading="lazy" />
+            <figcaption>Edin Džeko</figcaption>
+          </figure>
+          <figure class="hero-legend">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Luka_Modri%C4%87_2018.jpg/640px-Luka_Modri%C4%87_2018.jpg" alt="Luka Modrić" loading="lazy" />
+            <figcaption>Luka Modrić</figcaption>
+          </figure>
         </div>
         <aside class="status-card">
           <span>${completedGroupMatches} / ${groupMatches.length}</span>
@@ -1786,28 +1778,7 @@ function render() {
           <small>Aktiv gruppe ${state.activeGroup}: ${activeProgress.completed}/${activeProgress.total} kamper</small>
           <small>Mester: ${escapeHtml(championName)}</small>
           ${champion?.home?.team && champion?.away?.team ? `<small>Finale: ${escapeHtml(champion.home.team.name)} – ${escapeHtml(champion.away.team.name)}</small>` : ''}
-          <button data-action="reset">Nullstill demo</button>
         </aside>
-      </section>
-
-      <section class="panel legends-panel">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Favoritter</p>
-            <h2>Legender på plakaten</h2>
-          </div>
-          <p>En liten hyllest til Edin Džeko og Luka Modrić før tippingen starter.</p>
-        </div>
-        <div class="legend-players">
-          <figure class="legend-player">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Edin_Dzeko_2021.jpg/640px-Edin_Dzeko_2021.jpg" alt="Edin Džeko" loading="lazy" />
-            <figcaption><strong>Edin Džeko</strong><small>Bosnias målmaskin</small></figcaption>
-          </figure>
-          <figure class="legend-player">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Luka_Modri%C4%87_2018.jpg/640px-Luka_Modri%C4%87_2018.jpg" alt="Luka Modrić" loading="lazy" />
-            <figcaption><strong>Luka Modrić</strong><small>Kroatias maestro</small></figcaption>
-          </figure>
-        </div>
       </section>
 
       <section class="panel participant-panel">
@@ -1890,7 +1861,6 @@ function render() {
     </main>
   `
 
-  app.querySelector('[data-action="reset"]')?.addEventListener('click', resetAll)
   app.querySelector('[data-action="submit-tips"]')?.addEventListener('click', () => submitTips(bracket))
   app.querySelectorAll('[data-group]').forEach((button) => {
     button.addEventListener('click', (event) => setActiveGroup(event.currentTarget.dataset.group))

@@ -47,7 +47,7 @@ main {
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 320px) 340px;
   gap: 24px;
   align-items: stretch;
   padding: 42px;
@@ -73,6 +73,33 @@ main {
   color: rgba(255, 255, 255, 0.76);
   font-size: 1.12rem;
   line-height: 1.7;
+}
+
+.hero-legends {
+  display: grid;
+  gap: 10px;
+  align-content: center;
+}
+
+.hero-legend {
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  background: rgba(0, 0, 0, 0.36);
+  overflow: hidden;
+}
+
+.hero-legend img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.hero-legend figcaption {
+  padding: 8px 10px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .eyebrow {
@@ -119,14 +146,12 @@ main {
   line-height: 1.4;
 }
 
-.status-card button,
 .group-nav button,
 .group-tabs button,
 .knockout-match button {
   transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
 }
 
-.status-card button,
 .group-nav button {
   margin-top: 12px;
   border: 1px solid var(--deloitte-green);
@@ -136,7 +161,6 @@ main {
   font-weight: 900;
 }
 
-.status-card button:hover,
 .group-nav button:hover:not(:disabled),
 .group-tabs button:hover {
   transform: translateY(-1px);
@@ -174,43 +198,6 @@ main {
   line-height: 1.6;
 }
 
-
-
-.legends-panel {
-  border-color: var(--deloitte-green);
-}
-
-.legend-players {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(240px, 1fr));
-  gap: 16px;
-}
-
-.legend-player {
-  margin: 0;
-  border: 1px solid var(--deloitte-gray-200);
-  background: linear-gradient(180deg, #0f0f0f 0%, #1b1b1b 100%);
-  color: var(--white);
-  overflow: hidden;
-}
-
-.legend-player img {
-  display: block;
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  object-fit: cover;
-  filter: saturate(1.05) contrast(1.03);
-}
-
-.legend-player figcaption {
-  display: grid;
-  gap: 2px;
-  padding: 12px;
-}
-
-.legend-player figcaption small {
-  color: rgba(255, 255, 255, 0.8);
-}
 
 .participant-panel {
   border-color: var(--deloitte-green);
@@ -710,8 +697,7 @@ td:last-child {
 
   .group-tabs,
   .participant-grid,
-  .submit-summary,
-  .legend-players {
+  .submit-summary {
     grid-template-columns: 1fr;
   }
 
