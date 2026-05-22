@@ -96,10 +96,7 @@ main {
 }
 
 .hero-legend figcaption {
-  padding: 8px 10px;
-  font-weight: 800;
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.92);
+  display: none;
 }
 
 .eyebrow {
