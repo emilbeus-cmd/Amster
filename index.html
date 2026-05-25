@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Forsikringsduell – lokal demo</title>
+  <style>
+    body{font-family:Arial,sans-serif;max-width:1000px;margin:20px auto;padding:0 12px;background:#f7f7fb;color:#111}
+    h1,h2{margin:.4rem 0}
+    .card{background:#fff;border:1px solid #ddd;border-radius:10px;padding:14px;margin:12px 0}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    label{font-size:.9rem;font-weight:600;display:block;margin-top:8px}
+    input,select,textarea,button{width:100%;padding:8px;border:1px solid #bbb;border-radius:8px}
+    textarea{min-height:70px}
+    button{cursor:pointer;background:#1f5eff;color:#fff;border:none;font-weight:700}
+    .muted{color:#555;font-size:.9rem}
+    .pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef3ff;margin-right:6px}
+    .result{font-size:1.05rem;line-height:1.5}
+    .small{font-size:.85rem;color:#666}
+  </style>
+</head>
+<body>
+  <h1>Forsikringsduell (lokal demo)</h1>
+  <p class="muted">Kjører 100% lokalt i nettleseren. Ingen hosting, ingen backend.</p>
+
+  <div class="card">
+    <h2>1) Last opp PDF-er (demo)</h2>
+    <p class="small">I denne enkle, offline demoen registreres PDF-filnavn som dokumentasjon per tilbyder. Selve vilkårstall legges inn i skjemaet under.</p>
+    <div class="row">
+      <div>
+        <label for="pdfX">Tilbyder X – PDF-er</label>
+        <input id="pdfX" type="file" accept="application/pdf" multiple />
+        <div id="filesX" class="small"></div>
+      </div>
+      <div>
+        <label for="pdfY">Tilbyder Y – PDF-er</label>
+        <input id="pdfY" type="file" accept="application/pdf" multiple />
+        <div id="filesY" class="small"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2) Nøkkeldata fra vilkår</h2>
+    <p class="small">Må fylles for alle 4: Hus, Innbo, Reise, Barn.</p>
+    <div class="row" id="coverageForms"></div>
+  </div>
+
+  <div class="card">
+    <h2>3) Totalpris</h2>
+    <div class="row">
+      <div><label>Årlig totalpris X (kr)</label><input id="priceX" type="number" min="0" /></div>
+      <div><label>Årlig totalpris Y (kr)</label><input id="priceY" type="number" min="0" /></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>4) 10 spørsmål (for DEG)</h2>
+    <div id="questions"></div>
+  </div>
+
+  <button id="run">Beregn anbefaling</button>
+
+  <div class="card" id="output" style="display:none"></div>
+
+<script>
+const categories = ["Hus","Innbo","Reise","Barn"];
+const formHost = document.getElementById('coverageForms');
+
+function catBlock(provider, cat) {
+  return `
+    <div class="card">
+      <h3>${provider} – ${cat}</h3>
+      <label>Egenandel (kr)</label><input id="${provider}_${cat}_deductible" type="number" min="0" value="0" />
+      <label>Dekningsscore (0-10)</label><input id="${provider}_${cat}_coverage" type="number" min="0" max="10" value="7" />
+      <label>Viktig unntak? (Ja/Nei)</label>
+      <select id="${provider}_${cat}_exclusion"><option>Nei</option><option>Ja</option></select>
+      <label>Notat (kort)</label><textarea id="${provider}_${cat}_note"></textarea>
+    </div>`;
+}
+formHost.innerHTML = ["X","Y"].map(p => `<div>${categories.map(c => catBlock(p,c)).join('')}</div>`).join('');
+
+function renderFiles(inputId, outId){
+  const files = [...document.getElementById(inputId).files].map(f=>`• ${f.name}`).join('<br>');
+  document.getElementById(outId).innerHTML = files || 'Ingen filer valgt';
+}
+['pdfX','pdfY'].forEach((id,i)=> document.getElementById(id).addEventListener('change', ()=>renderFiles(id,i===0?'filesX':'filesY')));
+
+const questions = [
+  {id:'q1', t:'Hvor viktig er lav totalpris?', type:'range', min:1,max:5,val:3},
+  {id:'q2', t:'Hvor stor egenandel tåler du?', type:'select', opts:['Lav (<5000)','Middels (5000-15000)','Høy (>15000)']},
+  {id:'q3', t:'Hvor viktig er lav egenandel generelt?', type:'range', min:1,max:5,val:3},
+  {id:'q4', t:'Hvor viktig er boligskader (vann/brann)?', type:'range', min:1,max:5,val:3},
+  {id:'q5', t:'Hvor viktig er innbo-uhell (knust mobil osv)?', type:'range', min:1,max:5,val:3},
+  {id:'q6', t:'Hvor ofte reiser du internasjonalt?', type:'select', opts:['Sjeldent','1-2 ganger/år','3+ ganger/år']},
+  {id:'q7', t:'Har du ofte med dyre ting på reise?', type:'select', opts:['Nei','Ja']},
+  {id:'q8', t:'Hvor viktig er høy erstatning ved tyveri/tap på reise?', type:'range', min:1,max:5,val:3},
+  {id:'q9', t:'Hvor viktig er sterk barneforsikring ved alvorlig sykdom/uførhet?', type:'range', min:1,max:5,val:3},
+  {id:'q10',t:'Hva prioriterer du?', type:'select', opts:['Balanse','Lavere pris','Bedre dekning']}
+];
+
+const qHost = document.getElementById('questions');
+qHost.innerHTML = questions.map(q=>`<label>${q.t}</label>${q.type==='range' ? `<input id="${q.id}" type="range" min="${q.min}" max="${q.max}" value="${q.val}" />` : `<select id="${q.id}">${q.opts.map(o=>`<option>${o}</option>`).join('')}</select>`}`).join('');
+
+function getNum(id){ return Number(document.getElementById(id).value || 0); }
+
+function scoreProvider(p){
+  const catWeights = {
+    Hus: getNum('q4'),
+    Innbo: getNum('q5'),
+    Reise: getNum('q8') + (document.getElementById('q6').value==='3+ ganger/år'?1:0) + (document.getElementById('q7').value==='Ja'?1:0),
+    Barn: getNum('q9')
+  };
+
+  let cover = 0, totalW = 0;
+  const reasons=[];
+  for(const c of categories){
+    const cov = getNum(`${p}_${c}_coverage`)*10;
+    const ded = getNum(`${p}_${c}_deductible`);
+    const excl = document.getElementById(`${p}_${c}_exclusion`).value==='Ja' ? 8 : 0;
+    const q2 = document.getElementById('q2').value;
+    const deductiblePenalty = (q2.includes('Lav') ? ded/600 : q2.includes('Middels') ? ded/1200 : ded/2200);
+    const s = Math.max(0, Math.min(100, cov - deductiblePenalty - excl));
+    cover += s * catWeights[c]; totalW += catWeights[c];
+    reasons.push({cat:c,score:s,note:document.getElementById(`${p}_${c}_note`).value || 'ingen notat'});
+  }
+  return {coverageScore: cover/Math.max(1,totalW), reasons};
+}
+
+document.getElementById('run').addEventListener('click', ()=>{
+  const px = getNum('priceX'), py = getNum('priceY');
+  if(!px || !py){ alert('Legg inn totalpris for begge tilbydere.'); return; }
+
+  const x = scoreProvider('X');
+  const y = scoreProvider('Y');
+
+  const low = Math.min(px,py);
+  const priceScoreX = Math.max(0, 100 - ((px-low)/low)*120);
+  const priceScoreY = Math.max(0, 100 - ((py-low)/low)*120);
+
+  const prio = document.getElementById('q10').value;
+  const priceImportance = getNum('q1');
+  let wPrice=0.5, wCoverage=0.5;
+  if(prio==='Lavere pris'){ wPrice=0.65; wCoverage=0.35; }
+  if(prio==='Bedre dekning'){ wPrice=0.3; wCoverage=0.7; }
+  if(priceImportance>=4) { wPrice+=0.1; wCoverage-=0.1; }
+
+  const totalX = x.coverageScore*wCoverage + priceScoreX*wPrice;
+  const totalY = y.coverageScore*wCoverage + priceScoreY*wPrice;
+
+  const chosen = totalX >= totalY ? 'X' : 'Y';
+  const other = chosen === 'X' ? 'Y' : 'X';
+  const chosenScore = chosen === 'X' ? totalX : totalY;
+  const otherScore = chosen === 'X' ? totalY : totalX;
+  const chosenCov = chosen === 'X' ? x : y;
+  const delta = Math.abs(chosenScore - otherScore).toFixed(1);
+  const diffPrice = Math.abs(px-py).toLocaleString('no-NO');
+  const cheap = px<py ? 'X' : 'Y';
+
+  const topReasons = chosenCov.reasons.sort((a,b)=>b.score-a.score).slice(0,2).map(r=>`<li>${r.cat}: sterk match (score ${r.score.toFixed(0)}). Notat: ${r.note}</li>`).join('');
+
+  const out = document.getElementById('output');
+  out.style.display='block';
+  out.innerHTML = `
+    <h2>Anbefaling: Velg ${chosen}</h2>
+    <div class="result">
+      <p><span class="pill">Totalscore ${chosen}: ${chosenScore.toFixed(1)}</span><span class="pill">${other}: ${otherScore.toFixed(1)}</span><span class="pill">Forskjell: ${delta}</span></p>
+      <ul>
+        <li>Prisforskjell mellom tilbyderne er ${diffPrice} kr/år. Billigst er ${cheap}.</li>
+        <li>Vekting brukt: pris ${Math.round(wPrice*100)}% / dekning ${Math.round(wCoverage*100)}%.</li>
+        ${topReasons}
+      </ul>
+    </div>`;
+});
+</script>
+</body>
+</html>
