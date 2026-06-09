@@ -473,6 +473,32 @@ td:last-child {
   font-weight: 800;
 }
 
+.third-ranking-panel {
+  border-color: var(--deloitte-green);
+}
+
+.third-warning {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border-left: 5px solid #b00020;
+  background: #fff2f4;
+  color: #540010;
+}
+
+.third-warning strong {
+  font-size: 0.95rem;
+}
+
+.third-warning span {
+  line-height: 1.45;
+}
+
+.third-ranking-table .tie-warning-row td {
+  background: #fff7d6;
+}
+
 .legend i {
   width: 9px;
   height: 9px;
@@ -1037,6 +1063,59 @@ function compareHeadToHeadRows(a, b) {
   return b.points - a.points || b.goalDifference - a.goalDifference || b.goalsFor - a.goalsFor
 }
 
+function compareThirdPlaceRows(a, b) {
+  if (!a && !b) return 0
+  if (!a) return 1
+  if (!b) return -1
+
+  return b.points - a.points || b.goalDifference - a.goalDifference || b.goalsFor - a.goalsFor
+}
+
+function thirdPlaceTieKey(row) {
+  return `${row.points}|${row.goalDifference}|${row.goalsFor}`
+}
+
+function buildThirdPlaceRanking(tables) {
+  const rows = groupIds
+    .map((group) => ({
+      group,
+      seed: `${group}3`,
+      source: `Treer gruppe ${group}`,
+      team: tables[group][2]?.team ?? null,
+      stats: tables[group][2],
+    }))
+    .sort((a, b) => compareThirdPlaceRows(a.stats, b.stats) || groupIds.indexOf(a.group) - groupIds.indexOf(b.group))
+
+  const tieGroups = new Map()
+  rows.forEach((entry) => {
+    const key = thirdPlaceTieKey(entry.stats)
+    if (!tieGroups.has(key)) tieGroups.set(key, [])
+    tieGroups.get(key).push(entry)
+  })
+
+  return rows.map((entry, index) => {
+    const tiedEntries = tieGroups.get(thirdPlaceTieKey(entry.stats)) ?? []
+    const tiedPositions = tiedEntries.map((candidate) => rows.indexOf(candidate) + 1)
+    const isQualified = index < 8
+    const unresolvedTie = tiedEntries.length > 1
+    const affectsQualification = unresolvedTie && tiedPositions.some((position) => position <= 8) && tiedPositions.some((position) => position > 8)
+    const affectsSlot = unresolvedTie && isQualified && tiedEntries.filter((candidate) => rows.indexOf(candidate) < 8).length > 1
+
+    return {
+      ...entry,
+      rank: index + 1,
+      qualified: isQualified,
+      tiedGroups: tiedEntries.map((candidate) => candidate.group),
+      unresolvedTie,
+      affectsQualification,
+      affectsSlot,
+      note: unresolvedTie
+        ? `Likt med gruppe ${tiedEntries.map((candidate) => candidate.group).join(', ')} på poeng, målforskjell og scorede mål. Fair play/loddtrekning er ikke hensyntatt.`
+        : '',
+    }
+  })
+}
+
 function buildQualifiers(tables) {
   const firstAndSecond = groupIds.flatMap((group) => [
     {
@@ -1053,15 +1132,8 @@ function buildQualifiers(tables) {
     },
   ])
 
-  const thirdPlaced = groupIds
-    .map((group) => ({
-      seed: `${group}3`,
-      source: `Treer gruppe ${group}`,
-      team: tables[group][2]?.team ?? null,
-      stats: tables[group][2],
-    }))
-    .sort((a, b) => compareRows(a.stats, b.stats))
-    .slice(0, 8)
+  const thirdPlaced = buildThirdPlaceRanking(tables)
+    .filter((entry) => entry.qualified)
     .map((qualifier, index) => ({
       ...qualifier,
       seed: `B3-${index + 1}`,
@@ -1071,20 +1143,60 @@ function buildQualifiers(tables) {
   return [...firstAndSecond, ...thirdPlaced]
 }
 
+function assignThirdPlaceSlots(rankedThirds, slotDefinitions) {
+  const slotsByCandidateCount = [...slotDefinitions].sort((a, b) => {
+    const candidatesA = rankedThirds.filter((qualifier) => a.allowedGroups.includes(qualifier.group)).length
+    const candidatesB = rankedThirds.filter((qualifier) => b.allowedGroups.includes(qualifier.group)).length
+    return candidatesA - candidatesB
+  })
+
+  const assignments = new Map()
+  const usedTeamIds = new Set()
+
+  function backtrack(slotIndex) {
+    if (slotIndex >= slotsByCandidateCount.length) return true
+
+    const slot = slotsByCandidateCount[slotIndex]
+    const candidates = rankedThirds.filter((qualifier) => {
+      const group = qualifier.group ?? qualifier.team?.group ?? qualifier.stats?.team?.group
+      return group && slot.allowedGroups.includes(group) && !usedTeamIds.has(qualifier.team?.id)
+    })
+
+    for (const candidate of candidates) {
+      assignments.set(slot.source, candidate)
+      usedTeamIds.add(candidate.team.id)
+      if (backtrack(slotIndex + 1)) return true
+      usedTeamIds.delete(candidate.team.id)
+      assignments.delete(slot.source)
+    }
+
+    return false
+  }
+
+  backtrack(0)
+  return assignments
+}
+
 function buildRoundOf32(qualifiers) {
   const bySeed = new Map(qualifiers.map((qualifier) => [qualifier.seed, qualifier]))
   const rankedThirds = Array.from({ length: 8 }, (_, index) => bySeed.get(`B3-${index + 1}`)).filter(Boolean)
-  const usedThirdTeamIds = new Set()
+  const thirdSlotDefinitions = [
+    { source: '3ABCDF', allowedGroups: 'ABCDF' },
+    { source: '3CDFGH', allowedGroups: 'CDFGH' },
+    { source: '3CEFHI', allowedGroups: 'CEFHI' },
+    { source: '3EHIJK', allowedGroups: 'EHIJK' },
+    { source: '3BEFIJ', allowedGroups: 'BEFIJ' },
+    { source: '3AEHIJ', allowedGroups: 'AEHIJ' },
+    { source: '3EFGIJ', allowedGroups: 'EFGIJ' },
+    { source: '3DEIJL', allowedGroups: 'DEIJL' },
+  ]
+  const thirdAssignments = assignThirdPlaceSlots(rankedThirds, thirdSlotDefinitions)
 
   const getSeed = (seed, source) => bySeed.get(seed) ?? placeholder(source)
-  const getThird = (allowedGroups, source) => {
-    const third = rankedThirds.find((qualifier) => {
-      const group = qualifier.team?.group ?? qualifier.stats?.team?.group
-      return group && allowedGroups.includes(group) && !usedThirdTeamIds.has(qualifier.team?.id)
-    })
+  const getThird = (source) => {
+    const third = thirdAssignments.get(source)
 
     if (!third?.team) return placeholder(source)
-    usedThirdTeamIds.add(third.team.id)
     return {
       ...third,
       source: `${third.source} · slot ${source}`,
@@ -1093,20 +1205,20 @@ function buildRoundOf32(qualifiers) {
 
   const roundOf32Slots = [
     ['M73', getSeed('A2', 'Toer gruppe A'), getSeed('B2', 'Toer gruppe B')],
-    ['M74', getSeed('E1', 'Vinner gruppe E'), getThird('ABCDF', '3ABCDF')],
+    ['M74', getSeed('E1', 'Vinner gruppe E'), getThird('3ABCDF')],
     ['M75', getSeed('F1', 'Vinner gruppe F'), getSeed('C2', 'Toer gruppe C')],
     ['M76', getSeed('C1', 'Vinner gruppe C'), getSeed('F2', 'Toer gruppe F')],
-    ['M77', getSeed('I1', 'Vinner gruppe I'), getThird('CDFGH', '3CDFGH')],
+    ['M77', getSeed('I1', 'Vinner gruppe I'), getThird('3CDFGH')],
     ['M78', getSeed('E2', 'Toer gruppe E'), getSeed('I2', 'Toer gruppe I')],
-    ['M79', getSeed('A1', 'Vinner gruppe A'), getThird('CEFHI', '3CEFHI')],
-    ['M80', getSeed('L1', 'Vinner gruppe L'), getThird('EHIJK', '3EHIJK')],
-    ['M81', getSeed('D1', 'Vinner gruppe D'), getThird('BEFIJ', '3BEFIJ')],
-    ['M82', getSeed('G1', 'Vinner gruppe G'), getThird('AEHIJ', '3AEHIJ')],
+    ['M79', getSeed('A1', 'Vinner gruppe A'), getThird('3CEFHI')],
+    ['M80', getSeed('L1', 'Vinner gruppe L'), getThird('3EHIJK')],
+    ['M81', getSeed('D1', 'Vinner gruppe D'), getThird('3BEFIJ')],
+    ['M82', getSeed('G1', 'Vinner gruppe G'), getThird('3AEHIJ')],
     ['M83', getSeed('K2', 'Toer gruppe K'), getSeed('L2', 'Toer gruppe L')],
     ['M84', getSeed('H1', 'Vinner gruppe H'), getSeed('J2', 'Toer gruppe J')],
-    ['M85', getSeed('B1', 'Vinner gruppe B'), getThird('EFGIJ', '3EFGIJ')],
+    ['M85', getSeed('B1', 'Vinner gruppe B'), getThird('3EFGIJ')],
     ['M86', getSeed('J1', 'Vinner gruppe J'), getSeed('H2', 'Toer gruppe H')],
-    ['M87', getSeed('K1', 'Vinner gruppe K'), getThird('DEIJL', '3DEIJL')],
+    ['M87', getSeed('K1', 'Vinner gruppe K'), getThird('3DEIJL')],
     ['M88', getSeed('D2', 'Toer gruppe D'), getSeed('G2', 'Toer gruppe G')],
   ]
 
@@ -1178,6 +1290,7 @@ window.Tournament = {
   buildKnockoutBracket,
   buildQualifiers,
   buildRoundOf32,
+  buildThirdPlaceRanking,
   calculateTables,
   compareRows,
   explainTieBreaker,
@@ -1197,6 +1310,7 @@ const {
   buildKnockoutBracket,
   buildQualifiers,
   buildRoundOf32,
+  buildThirdPlaceRanking,
   calculateTables,
   explainTieBreaker,
   getGroupProgress,
@@ -1628,6 +1742,7 @@ function getSubmissionPath() {
 
 function buildCurrentBracket() {
   const tables = calculateTables(state.predictions, state.customTeamNames)
+  const thirdPlaceRanking = buildThirdPlaceRanking(tables)
   const qualifiers = buildQualifiers(tables)
   const roundOf32 = buildRoundOf32(qualifiers)
   return buildKnockoutBracket(roundOf32, state.knockoutWinners)
@@ -1811,6 +1926,8 @@ function render() {
         ${renderActiveGroup(tables[state.activeGroup])}
       </section>
 
+      ${renderThirdPlaceTable(thirdPlaceRanking)}
+
       <section class="panel rules-panel">
         <div>
           <p class="eyebrow">Tie-breakere</p>
@@ -1971,6 +2088,56 @@ function renderTable(table) {
       </tbody>
     </table>
   `
+}
+
+function renderThirdPlaceTable(thirdPlaceRanking) {
+  const impactfulTies = thirdPlaceRanking.filter((entry) => entry.affectsQualification || entry.affectsSlot)
+  return `
+    <section class="panel third-ranking-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Live treertabell</p>
+          <h2>Beste gruppetreere</h2>
+        </div>
+        <p>
+          Tabellen viser hvordan appen rangerer alle 3.-plasslagene før de åtte beste sendes til sluttspillet.
+          Rangeringen bruker poeng, målforskjell og scorede mål. Fair play og loddtrekning er ikke hensyntatt.
+        </p>
+      </div>
+      ${impactfulTies.length ? `
+        <div class="third-warning" role="status">
+          <strong>Uavklart tie-break kan påvirke sluttspillet.</strong>
+          <span>${escapeHtml([...new Set(impactfulTies.flatMap((entry) => entry.tiedGroups))].join(', '))} står likt på kriteriene appen hensyntar. Appen bruker gruppe-rekkefølge A–L som midlertidig fallback.</span>
+        </div>
+      ` : ''}
+      <table class="third-ranking-table">
+        <thead>
+          <tr><th>#</th><th>Gr.</th><th>Lag</th><th>P</th><th>MF</th><th>M</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          ${thirdPlaceRanking.map((entry) => `
+            <tr class="${entry.qualified ? 'qualified' : ''} ${entry.affectsQualification || entry.affectsSlot ? 'tie-warning-row' : ''}">
+              <td>${entry.rank}</td>
+              <td>${escapeHtml(entry.group)}</td>
+              <td>${escapeHtml(entry.team?.name ?? 'Ukjent')}</td>
+              <td>${entry.stats?.points ?? 0}</td>
+              <td>${entry.stats?.goalDifference ?? 0}</td>
+              <td>${entry.stats?.goalsFor ?? 0}-${entry.stats?.goalsAgainst ?? 0}</td>
+              <td>${escapeHtml(getThirdPlaceStatus(entry))}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </section>
+  `
+}
+
+function getThirdPlaceStatus(entry) {
+  if (entry.affectsQualification) return 'Likt rundt kvalifiseringsgrensen'
+  if (entry.affectsSlot) return 'Likt – kan påvirke sluttspill-slot'
+  if (entry.qualified) return 'Videre som beste treer'
+  if (entry.unresolvedTie) return 'Likt, men uten direkte sluttspill-effekt nå'
+  return 'Ikke videre'
 }
 
 function renderMatchRow(match) {

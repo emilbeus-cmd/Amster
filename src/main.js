@@ -3,6 +3,7 @@ const {
   buildKnockoutBracket,
   buildQualifiers,
   buildRoundOf32,
+  buildThirdPlaceRanking,
   calculateTables,
   explainTieBreaker,
   getGroupProgress,
@@ -434,6 +435,7 @@ function getSubmissionPath() {
 
 function buildCurrentBracket() {
   const tables = calculateTables(state.predictions, state.customTeamNames)
+  const thirdPlaceRanking = buildThirdPlaceRanking(tables)
   const qualifiers = buildQualifiers(tables)
   const roundOf32 = buildRoundOf32(qualifiers)
   return buildKnockoutBracket(roundOf32, state.knockoutWinners)
@@ -617,6 +619,8 @@ function render() {
         ${renderActiveGroup(tables[state.activeGroup])}
       </section>
 
+      ${renderThirdPlaceTable(thirdPlaceRanking)}
+
       <section class="panel rules-panel">
         <div>
           <p class="eyebrow">Tie-breakere</p>
@@ -777,6 +781,56 @@ function renderTable(table) {
       </tbody>
     </table>
   `
+}
+
+function renderThirdPlaceTable(thirdPlaceRanking) {
+  const impactfulTies = thirdPlaceRanking.filter((entry) => entry.affectsQualification || entry.affectsSlot)
+  return `
+    <section class="panel third-ranking-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Live treertabell</p>
+          <h2>Beste gruppetreere</h2>
+        </div>
+        <p>
+          Tabellen viser hvordan appen rangerer alle 3.-plasslagene før de åtte beste sendes til sluttspillet.
+          Rangeringen bruker poeng, målforskjell og scorede mål. Fair play og loddtrekning er ikke hensyntatt.
+        </p>
+      </div>
+      ${impactfulTies.length ? `
+        <div class="third-warning" role="status">
+          <strong>Uavklart tie-break kan påvirke sluttspillet.</strong>
+          <span>${escapeHtml([...new Set(impactfulTies.flatMap((entry) => entry.tiedGroups))].join(', '))} står likt på kriteriene appen hensyntar. Appen bruker gruppe-rekkefølge A–L som midlertidig fallback.</span>
+        </div>
+      ` : ''}
+      <table class="third-ranking-table">
+        <thead>
+          <tr><th>#</th><th>Gr.</th><th>Lag</th><th>P</th><th>MF</th><th>M</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          ${thirdPlaceRanking.map((entry) => `
+            <tr class="${entry.qualified ? 'qualified' : ''} ${entry.affectsQualification || entry.affectsSlot ? 'tie-warning-row' : ''}">
+              <td>${entry.rank}</td>
+              <td>${escapeHtml(entry.group)}</td>
+              <td>${escapeHtml(entry.team?.name ?? 'Ukjent')}</td>
+              <td>${entry.stats?.points ?? 0}</td>
+              <td>${entry.stats?.goalDifference ?? 0}</td>
+              <td>${entry.stats?.goalsFor ?? 0}-${entry.stats?.goalsAgainst ?? 0}</td>
+              <td>${escapeHtml(getThirdPlaceStatus(entry))}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </section>
+  `
+}
+
+function getThirdPlaceStatus(entry) {
+  if (entry.affectsQualification) return 'Likt rundt kvalifiseringsgrensen'
+  if (entry.affectsSlot) return 'Likt – kan påvirke sluttspill-slot'
+  if (entry.qualified) return 'Videre som beste treer'
+  if (entry.unresolvedTie) return 'Likt, men uten direkte sluttspill-effekt nå'
+  return 'Ikke videre'
 }
 
 function renderMatchRow(match) {

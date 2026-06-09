@@ -466,6 +466,32 @@ td:last-child {
   font-weight: 800;
 }
 
+.third-ranking-panel {
+  border-color: var(--deloitte-green);
+}
+
+.third-warning {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border-left: 5px solid #b00020;
+  background: #fff2f4;
+  color: #540010;
+}
+
+.third-warning strong {
+  font-size: 0.95rem;
+}
+
+.third-warning span {
+  line-height: 1.45;
+}
+
+.third-ranking-table .tie-warning-row td {
+  background: #fff7d6;
+}
+
 .legend i {
   width: 9px;
   height: 9px;
