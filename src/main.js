@@ -435,7 +435,6 @@ function getSubmissionPath() {
 
 function buildCurrentBracket() {
   const tables = calculateTables(state.predictions, state.customTeamNames)
-  const thirdPlaceRanking = buildThirdPlaceRanking(tables)
   const qualifiers = buildQualifiers(tables)
   const roundOf32 = buildRoundOf32(qualifiers)
   return buildKnockoutBracket(roundOf32, state.knockoutWinners)
@@ -553,6 +552,7 @@ function render() {
   const app = document.querySelector('#root')
   if (!app) return
   const tables = calculateTables(state.predictions, state.customTeamNames)
+  const thirdPlaceRanking = buildThirdPlaceRanking(tables)
   const qualifiers = buildQualifiers(tables)
   const roundOf32 = buildRoundOf32(qualifiers)
   const bracket = buildKnockoutBracket(roundOf32, state.knockoutWinners)
