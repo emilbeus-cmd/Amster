@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="nb">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VM 2026 Tippekonkurranse</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <noscript>Du må aktivere JavaScript i nettleseren for å bruke VM 2026-tippekalkulatoren.</noscript>
+    <form name="vm-2026-tips" method="POST" data-netlify="true" hidden aria-hidden="true">
+      <input type="hidden" name="form-name" value="vm-2026-tips" />
+      <input type="hidden" name="formName" />
+      <input type="hidden" name="firstName" />
+      <input type="hidden" name="lastName" />
+      <input type="hidden" name="email" />
+      <input type="hidden" name="submittedAt" />
+      <input type="hidden" name="totalGroupGoals" />
+      <input type="hidden" name="championId" />
+      <input type="hidden" name="champion" />
+      <input type="hidden" name="groupPredictionsCompact" />
+      <input type="hidden" name="knockoutPicksCompact" />
+      <input type="hidden" name="bonusAnswersCompact" />
+      <input type="hidden" name="scoringRules" />
+      <input type="hidden" name="aiInputVersion" />
+      <input type="hidden" name="scoringConfigJson" />
+      <input type="hidden" name="predictionsJson" />
+      <input type="hidden" name="knockoutWinnersJson" />
+      <input type="hidden" name="bonusAnswersJson" />
+      <input type="hidden" name="payloadJson" />
+    </form>
+    <div id="root"></div>
+    <script defer src="./src/tournament.js"></script>
+    <script defer src="./src/main.js"></script>
+  </body>
+</html>
